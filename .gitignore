@@ -1,0 +1,45 @@
+# ACG To-Do monorepo (C:\todo)
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.history/
+.vscode/
+.idea/
+
+# Secrets
+.env
+.env.*
+!.env.example
+**/*token*
+**/*secret*
+
+# Flutter / Dart (also covered under acg_todo/.gitignore)
+**/.dart_tool/
+**/build/
+**/.pub-cache/
+**/.pub/
+**/coverage/
+**/.flutter-plugins-dependencies
+
+# Local debug dumps (not source)
+**/*.har
+**/log*.txt
+**/error*.JPG
+**/error*.jpg
+**/error*.png
+**/dist.json
+
+# Session noise (optional keep RETRO via force-add if needed)
+acg_todo/session/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Hive / test temp under tool dir
+**/.dart_tool/test_hive*/

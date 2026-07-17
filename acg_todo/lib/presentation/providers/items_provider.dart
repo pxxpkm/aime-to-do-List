@@ -1,3 +1,4 @@
+import 'package:acg_todo/core/utils/item_display.dart';
 import 'package:acg_todo/core/utils/logger.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/data/models/media_source.dart';
@@ -5,6 +6,7 @@ import 'package:acg_todo/data/repositories/bangumi/bangumi_search_result.dart';
 import 'package:acg_todo/data/repositories/items_repository.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
+import 'package:acg_todo/domain/entities/pin_tier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'daily_goal_provider.dart';
@@ -27,19 +29,24 @@ class ItemsNotifier extends _$ItemsNotifier {
     ref.invalidate(multiGoalProvider);
   }
 
+  Item _prepareForStore(Item item) {
+    final s2t = ref.read(goalSettingsStoreProvider).titleSimpToTrad;
+    return applyTitleS2t(
+      item.copyWith(posterUrl: normalizePosterUrl(item.posterUrl)),
+      enabled: s2t,
+    );
+  }
+
   /// Returns false if duplicate id.
   Future<bool> addItem(Item item) async {
-    final stored = item.copyWith(posterUrl: normalizePosterUrl(item.posterUrl));
+    final stored = _prepareForStore(item);
     final ok = await _repo.addItem(stored);
     if (ok) _refresh();
     return ok;
   }
 
   Future<int> addItems(List<Item> items) async {
-    final stored = items
-        .map((item) =>
-            item.copyWith(posterUrl: normalizePosterUrl(item.posterUrl)))
-        .toList();
+    final stored = items.map(_prepareForStore).toList();
     final n = await _repo.addItemsSkipExisting(stored);
     if (n > 0) _refresh();
     return n;
@@ -127,6 +134,26 @@ class ItemsNotifier extends _$ItemsNotifier {
 
   Future<void> setStatus(String id, String status) async {
     await _repo.setStatus(id, status);
+    _refresh();
+  }
+
+  Future<void> setPinned(String id, bool pinned) async {
+    await _repo.setPinned(id, pinned);
+    _refresh();
+  }
+
+  Future<void> setPinTier(String id, PinTier tier) async {
+    await _repo.setPinTier(id, tier);
+    _refresh();
+  }
+
+  Future<void> reorderPinnedItems(List<Item> ordered) async {
+    await _repo.reorderPinned(ordered.map((e) => e.id).toList());
+    _refresh();
+  }
+
+  Future<void> reorderPinTierItems(PinTier tier, List<Item> ordered) async {
+    await _repo.reorderPinTier(tier, ordered.map((e) => e.id).toList());
     _refresh();
   }
 

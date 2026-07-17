@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
 
@@ -24,34 +25,31 @@ class StatsPage extends ConsumerWidget {
           items.where((i) => i.type == c.storageKey).length;
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => context.pop(),
+    return AppScaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.pop(),
+                  ),
+                  const Text(
+                    '統計',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const Text(
-                      '統計',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              Expanded(
+            Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
@@ -191,7 +189,6 @@ class StatsPage extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -238,17 +235,15 @@ class StatsPage extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.pie_chart_outline,
               size: 48,
-              color: Colors.white.withValues(alpha: 0.2),
+              color: AppColors.inkMuted,
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               '新增項目後即可查看統計',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.4),
-              ),
+              style: TextStyle(color: AppColors.inkMuted),
             ),
           ],
         ),
@@ -274,9 +269,16 @@ class _SummaryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: AppColors.paperElevated,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x122C2416),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [

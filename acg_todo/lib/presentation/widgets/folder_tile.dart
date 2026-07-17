@@ -34,23 +34,22 @@ class FolderTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(20),
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            color: AppColors.surface.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(20),
+            color: AppColors.paperElevated,
             border: Border.all(
               color: isDropHighlight
                   ? AppColors.anime
-                  : color.withValues(alpha: 0.45),
+                  : AppColors.borderSubtle,
               width: isDropHighlight ? 2 : 1,
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
-                color: (isDropHighlight ? AppColors.anime : color)
-                    .withValues(alpha: 0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: Color(0x1A2C2416),
+                blurRadius: 16,
+                offset: Offset(0, 6),
               ),
             ],
           ),
@@ -76,7 +75,8 @@ class FolderTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                          fontSize: 13,
+                          color: AppColors.inkPrimary,
                         ),
                       ),
                     ),
@@ -84,7 +84,7 @@ class FolderTile extends StatelessWidget {
                       '$count',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppColors.inkMuted,
                       ),
                     ),
                   ],
@@ -130,7 +130,7 @@ class _PreviewStack extends StatelessWidget {
                 child: Transform.rotate(
                   angle: (i - 1) * 0.06,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(10),
                     child: SizedBox(
                       width: w,
                       height: h,

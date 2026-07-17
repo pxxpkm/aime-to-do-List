@@ -6,11 +6,19 @@ import 'package:flutter/foundation.dart';
 
 import 'package:acg_todo/core/notifications/web_browser_notification.dart';
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_scaffold.dart';
+import 'package:acg_todo/data/local/library_backend_info.dart';
 import 'package:acg_todo/domain/services/reminder_types.dart';
 import 'package:acg_todo/presentation/providers/bangumi_provider.dart';
 import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
+import 'package:acg_todo/presentation/providers/folders_provider.dart';
+import 'package:acg_todo/presentation/providers/items_provider.dart';
 import 'package:acg_todo/presentation/providers/notification_providers.dart';
 import 'package:acg_todo/presentation/providers/repository_providers.dart';
+import 'package:acg_todo/presentation/widgets/backup_import_sheet.dart';
+import 'package:acg_todo/presentation/widgets/hive_to_server_migrate_sheet.dart';
+import 'package:acg_todo/presentation/widgets/storage_mode_banner.dart';
+import 'package:acg_todo/data/local/hive_cache.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -38,45 +46,58 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final bangumiState = ref.watch(bangumiNotifierProvider);
+    final backend = ref.watch(libraryBackendInfoProvider);
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
+    return AppScaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const StorageModeBanner(),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  if (context.canPop())
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => context.pop(),
                     ),
-                    const Text(
-                      '設定',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  const Text(
+                    '設定',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              Expanded(
+            Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
+                    // ── 儲存位置 ──
+                    const _SectionTitle(title: '儲存位置'),
+                    const SizedBox(height: 8),
+                    _SettingTile(
+                      title: backend.title,
+                      subtitle: backend.detail,
+                      icon: backend.isServer
+                          ? Icons.storage_outlined
+                          : Icons.web_asset_outlined,
+                      onTap: () {},
+                    ),
+                    const SizedBox(height: 32),
+
                     // ── Bangumi 帳號 ──
                     const _SectionTitle(title: 'Bangumi 帳號'),
                     const SizedBox(height: 8),
 
                     if (bangumiState.isVerified) ...[
                       Material(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: AppColors.paperElevated,
                         borderRadius: BorderRadius.circular(12),
                         child: ListTile(
                           leading:
@@ -92,7 +113,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                       const SizedBox(height: 8),
                       Material(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: AppColors.paperElevated,
                         borderRadius: BorderRadius.circular(12),
                         child: ListTile(
                           leading:
@@ -106,7 +127,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                     ] else ...[
                       Material(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: AppColors.paperElevated,
                         borderRadius: BorderRadius.circular(12),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -131,7 +152,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 ),
                                 filled: true,
                                 fillColor:
-                                    Colors.white.withValues(alpha: 0.05),
+                                    AppColors.paperElevated,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -203,6 +224,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     const _SectionTitle(title: '搜尋'),
                     const SizedBox(height: 8),
                     const _SearchT2sSetting(),
+                    const SizedBox(height: 8),
+                    const _TitleS2tSetting(),
                     const SizedBox(height: 32),
 
                     // ── 通知設定 ──
@@ -214,11 +237,88 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     // ── 資料 ──
                     const _SectionTitle(title: '資料'),
                     const SizedBox(height: 8),
+                    if (backend.isServer) ...[
+                      Builder(
+                        builder: (context) {
+                          final hive = ref.watch(hiveCacheProvider);
+                          final counts = ref
+                              .read(libraryBackupRepositoryProvider)
+                              .hiveSnapshotCounts(hive);
+                          final canMigrate = !counts.isEmpty;
+                          return _SettingTile(
+                            title: '上傳瀏覽器資料到磁碟庫',
+                            subtitle: canMigrate
+                                ? 'Hive 作品 ${counts.itemCount} · '
+                                    '資料夾 ${counts.folderCount} → library.db'
+                                : '瀏覽器無作品可遷移',
+                            icon: Icons.cloud_upload_outlined,
+                            onTap: canMigrate
+                                ? () => showHiveToServerMigrateSheet(context)
+                                : () {},
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     _SettingTile(
-                      title: '清除快取',
-                      subtitle: '清除本地快取的項目資料',
+                      title: '匯出備份',
+                      subtitle: '下載 JSON（作品、資料夾、目標進度）',
+                      icon: Icons.download_outlined,
+                      onTap: () => exportLibraryBackup(ref, context),
+                    ),
+                    const SizedBox(height: 8),
+                    _SettingTile(
+                      title: '匯入備份',
+                      subtitle: '合併另一個網址的庫，或還原 JSON',
+                      icon: Icons.upload_outlined,
+                      onTap: () => showBackupImportSheet(context),
+                    ),
+                    const SizedBox(height: 8),
+                    _SettingTile(
+                      title: '清除本機作品',
+                      subtitle: backend.isServer
+                          ? '刪除磁碟庫中的全部作品（資料夾保留）'
+                          : '刪除瀏覽器內全部作品（資料夾保留）',
                       icon: Icons.delete_sweep_outlined,
-                      onTap: () {},
+                      onTap: () async {
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('清除本機作品？'),
+                            content: Text(
+                              backend.isServer
+                                  ? '將刪除磁碟庫（SQLite）中的全部作品，無法復原。'
+                                      '建議先「匯出備份」。'
+                                  : '將刪除這個瀏覽器網址下的全部作品，無法復原。'
+                                      '建議先「匯出備份」。',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('取消'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.danger,
+                                ),
+                                child: const Text('清除'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (ok != true || !context.mounted) return;
+                        await ref
+                            .read(libraryBackupRepositoryProvider)
+                            .clearLibraryItems();
+                        ref.invalidate(itemsNotifierProvider);
+                        ref.invalidate(foldersNotifierProvider);
+                        ref.invalidate(multiGoalProvider);
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('已清除本機作品')),
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 32),
@@ -247,7 +347,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ],
           ),
         ),
-      ),
     );
   }
 }
@@ -387,7 +486,7 @@ class _GoalStepperTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final on = enabled ?? true;
     return Material(
-      color: Colors.white.withValues(alpha: 0.05),
+      color: AppColors.paperElevated,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
@@ -436,7 +535,7 @@ class _SearchT2sSetting extends ConsumerWidget {
     ref.watch(dailyGoalTickProvider);
     final on = store.searchTradToSimp;
     return Material(
-      color: Colors.white.withValues(alpha: 0.05),
+      color: AppColors.paperElevated,
       borderRadius: BorderRadius.circular(12),
       child: SwitchListTile(
         secondary: const Icon(Icons.translate, color: AppColors.manga),
@@ -455,6 +554,34 @@ class _SearchT2sSetting extends ConsumerWidget {
   }
 }
 
+class _TitleS2tSetting extends ConsumerWidget {
+  const _TitleS2tSetting();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final store = ref.watch(goalSettingsStoreProvider);
+    ref.watch(dailyGoalTickProvider);
+    final on = store.titleSimpToTrad;
+    return Material(
+      color: AppColors.paperElevated,
+      borderRadius: BorderRadius.circular(12),
+      child: SwitchListTile(
+        secondary: const Icon(Icons.title, color: AppColors.lightNovel),
+        title: const Text('標題簡轉繁'),
+        subtitle: const Text(
+          '新增與顯示時把簡體標題轉成繁體',
+          style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+        ),
+        value: on,
+        onChanged: (v) async {
+          await store.setTitleSimpToTrad(v);
+          ref.read(dailyGoalTickProvider.notifier).state++;
+        },
+      ),
+    );
+  }
+}
+
 class _HomeDensitySetting extends ConsumerWidget {
   const _HomeDensitySetting();
 
@@ -465,7 +592,7 @@ class _HomeDensitySetting extends ConsumerWidget {
     final density = store.homeGridDensity;
 
     return Material(
-      color: Colors.white.withValues(alpha: 0.05),
+      color: AppColors.paperElevated,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -476,21 +603,47 @@ class _HomeDensitySetting extends ConsumerWidget {
               children: [
                 Icon(Icons.grid_view, color: AppColors.manga, size: 20),
                 SizedBox(width: 8),
-                Text('海報大小', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text('媒體庫海報大小', style: TextStyle(fontWeight: FontWeight.w600)),
               ],
             ),
             const SizedBox(height: 8),
             SegmentedButton<String>(
               segments: const [
+                ButtonSegment(value: 'large', label: Text('畫廊')),
+                ButtonSegment(value: 'comfortable', label: Text('標準')),
                 ButtonSegment(value: 'compact', label: Text('緊湊')),
-                ButtonSegment(value: 'comfortable', label: Text('適中')),
-                ButtonSegment(value: 'large', label: Text('放大')),
               ],
               selected: {density},
               onSelectionChanged: (s) async {
                 await store.setHomeGridDensity(s.first);
                 ref.read(dailyGoalTickProvider.notifier).state++;
               },
+            ),
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Icon(Icons.image_outlined, color: AppColors.anime, size: 20),
+                SizedBox(width: 8),
+                Text('主頁大海報', style: TextStyle(fontWeight: FontWeight.w600)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'daily', label: Text('每日')),
+                ButtonSegment(value: 'pinned', label: Text('固定')),
+                ButtonSegment(value: 'off', label: Text('關閉')),
+              ],
+              selected: {store.homeHeroMode},
+              onSelectionChanged: (s) async {
+                await store.setHomeHeroMode(s.first);
+                ref.read(dailyGoalTickProvider.notifier).state++;
+              },
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '固定：用抽海報結果「設為主頁海報」。抽卡不影響正在追/優先追。',
+              style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
             ),
           ],
         ),
@@ -550,7 +703,7 @@ class _NotificationSettingsPanel extends ConsumerWidget {
         if (deadline && master) ...[
           const SizedBox(height: 4),
           Material(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: AppColors.paperElevated,
             borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -618,7 +771,7 @@ class _NotificationSettingsPanel extends ConsumerWidget {
         if (stale && master) ...[
           const SizedBox(height: 4),
           Material(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: AppColors.paperElevated,
             borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
@@ -670,7 +823,7 @@ class _NotificationSettingsPanel extends ConsumerWidget {
         if (kIsWeb) ...[
           const SizedBox(height: 8),
           Material(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: AppColors.paperElevated,
             borderRadius: BorderRadius.circular(12),
             child: ListTile(
               leading: const Icon(Icons.web, color: AppColors.manga),
@@ -712,7 +865,7 @@ class _NotificationSettingsPanel extends ConsumerWidget {
         ],
         const SizedBox(height: 8),
         Material(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: AppColors.paperElevated,
           borderRadius: BorderRadius.circular(12),
           child: ListTile(
             leading: const Icon(Icons.refresh, color: AppColors.lightNovel),
@@ -771,7 +924,7 @@ class _SwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.05),
+      color: AppColors.paperElevated,
       borderRadius: BorderRadius.circular(12),
       child: SwitchListTile(
         secondary: Icon(icon, color: AppColors.manga),
@@ -803,7 +956,7 @@ class _SettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.05),
+      color: AppColors.paperElevated,
       borderRadius: BorderRadius.circular(12),
       child: ListTile(
         leading: Icon(icon, color: AppColors.manga),

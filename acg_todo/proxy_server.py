@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
-"""Local static + CORS image proxy for Flutter Web poster loading.
+"""Local static + CORS image proxy + SQLite library API for Flutter Web.
 
-Serves build/web on 8080 and proxies Bangumi CDN images via:
-  GET /proxy?url=<encoded-https-url>
+Serves build/web on 8080, proxies Bangumi CDN images, and exposes:
+  GET  /api/health
+  GET/PUT /api/v1/library
+  GET/PUT/DELETE /api/v1/items[/{id}]
+  PUT /api/v1/items:batch
+  GET/PUT/DELETE /api/v1/folders[/{id}]
+  PUT /api/v1/folders:batch
+  GET/PUT /api/v1/settings
+  GET/PUT/DELETE /api/v1/notifications
 
 Usage:
   cd C:\\todo\\acg_todo
   flutter build web --release
   python proxy_server.py
   # open http://127.0.0.1:8080
+  # health: http://127.0.0.1:8080/api/health
 """
 
 from __future__ import annotations
@@ -23,6 +31,9 @@ import urllib.request
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from server.api import handle_api
+from server.db import LibraryDB
+
 ALLOWED_HOST_SUFFIXES = (".bgm.tv",)
 ALLOWED_HOSTS = frozenset({"bgm.tv", "lain.bgm.tv"})
 DEFAULT_PORT = 8080
@@ -31,6 +42,10 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/120.0.0.0 Safari/537.36"
 )
+
+# Set in main() before serving.
+DB: LibraryDB | None = None
+PROJECT_ROOT = Path(__file__).resolve().parent
 
 
 def is_allowed_target(url: str) -> bool:
@@ -48,14 +63,25 @@ def is_allowed_target(url: str) -> bool:
     return any(host.endswith(suffix) for suffix in ALLOWED_HOST_SUFFIXES)
 
 
+def _cors_api_headers(handler: SimpleHTTPRequestHandler) -> None:
+    handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.send_header("Access-Control-Allow-Methods", "GET, PUT, DELETE, OPTIONS")
+    handler.send_header("Access-Control-Allow-Headers", "Content-Type")
+    handler.send_header("Access-Control-Max-Age", "86400")
+
+
 class CombinedHandler(SimpleHTTPRequestHandler):
     def end_headers(self) -> None:
-        # Static assets also need CORS for Flutter web tooling edge cases.
-        if not self.path.startswith("/proxy"):
+        if not self.path.startswith("/proxy") and not self.path.startswith("/api"):
             self.send_header("Access-Control-Allow-Origin", "*")
         super().end_headers()
 
     def do_OPTIONS(self) -> None:  # noqa: N802
+        if self.path.startswith("/api"):
+            self.send_response(204)
+            _cors_api_headers(self)
+            self.end_headers()
+            return
         if self.path.startswith("/proxy"):
             self.send_response(204)
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -67,11 +93,43 @@ class CombinedHandler(SimpleHTTPRequestHandler):
         self.send_error(404, "Not Found")
 
     def do_GET(self) -> None:  # noqa: N802
+        if self._try_api("GET"):
+            return
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/proxy":
             self._handle_proxy(parsed)
             return
         super().do_GET()
+
+    def do_PUT(self) -> None:  # noqa: N802
+        if self._try_api("PUT"):
+            return
+        self.send_error(404, "Not Found")
+
+    def do_DELETE(self) -> None:  # noqa: N802
+        if self._try_api("DELETE"):
+            return
+        self.send_error(404, "Not Found")
+
+    def _try_api(self, method: str) -> bool:
+        if DB is None:
+            return False
+        parsed = urllib.parse.urlparse(self.path)
+        if not parsed.path.startswith("/api"):
+            return False
+        result = handle_api(self, method, self.path, DB)
+        if result is None:
+            return False
+        status, body, content_type = result
+        self.send_response(status)
+        _cors_api_headers(self)
+        if content_type:
+            self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if body and self.command != "HEAD":
+            self.wfile.write(body)
+        return True
 
     def _handle_proxy(self, parsed: urllib.parse.ParseResult) -> None:
         qs = urllib.parse.parse_qs(parsed.query)
@@ -85,7 +143,6 @@ class CombinedHandler(SimpleHTTPRequestHandler):
             self.send_error(400, "Empty url query parameter")
             return
 
-        # Accept once-encoded or double-encoded values from browsers.
         for _ in range(2):
             decoded = urllib.parse.unquote(target)
             if decoded == target:
@@ -140,13 +197,23 @@ class CombinedHandler(SimpleHTTPRequestHandler):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Flutter web static + Bangumi image proxy")
+    global DB
+
+    parser = argparse.ArgumentParser(
+        description="Flutter web static + Bangumi proxy + SQLite library API"
+    )
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument(
         "--root",
         type=str,
-        default=str(Path(__file__).resolve().parent / "build" / "web"),
+        default=str(PROJECT_ROOT / "build" / "web"),
         help="Document root (default: build/web next to this script)",
+    )
+    parser.add_argument(
+        "--db",
+        type=str,
+        default=str(PROJECT_ROOT / "data" / "library.db"),
+        help="SQLite database path (default: data/library.db)",
     )
     args = parser.parse_args()
 
@@ -159,12 +226,16 @@ def main() -> int:
         )
         return 1
 
+    db_path = Path(args.db).resolve()
+    DB = LibraryDB(db_path)
+
     os.chdir(root)
-    handler = CombinedHandler
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler)
+    server = ThreadingHTTPServer(("127.0.0.1", args.port), CombinedHandler)
     print(f"Serving {root}")
-    print(f"  app:   http://127.0.0.1:{args.port}/")
-    print(f"  proxy: http://127.0.0.1:{args.port}/proxy?url=<encoded>")
+    print(f"  app:    http://127.0.0.1:{args.port}/")
+    print(f"  proxy:  http://127.0.0.1:{args.port}/proxy?url=<encoded>")
+    print(f"  api:    http://127.0.0.1:{args.port}/api/health")
+    print(f"  db:     {db_path}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

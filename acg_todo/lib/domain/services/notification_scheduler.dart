@@ -1,7 +1,7 @@
 import 'package:acg_todo/core/notifications/web_browser_notification.dart';
 import 'package:acg_todo/core/utils/logger.dart';
 import 'package:acg_todo/data/local/goal_settings_store.dart';
-import 'package:acg_todo/data/local/notification_cache.dart';
+import 'package:acg_todo/data/local/notification_store.dart';
 import 'package:acg_todo/data/repositories/items_repository.dart';
 import 'package:acg_todo/domain/entities/notification.dart';
 import 'package:acg_todo/domain/services/deadline_service.dart';
@@ -12,7 +12,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationScheduler {
   final ItemsRepository _itemsRepo;
-  final NotificationCache _notifCache;
+  final NotificationStore _notifCache;
   final GoalSettingsStore _goalSettings;
   final ReminderService _reminderService;
 
@@ -23,7 +23,7 @@ class NotificationScheduler {
 
   NotificationScheduler({
     required ItemsRepository itemsRepo,
-    required NotificationCache notifCache,
+    required NotificationStore notifCache,
     required GoalSettingsStore goalSettings,
     DeadlineService deadlineService = const DeadlineService(),
     ReminderService? reminderService,

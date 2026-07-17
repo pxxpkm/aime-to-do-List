@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/domain/entities/item_category.dart';
+import 'package:acg_todo/presentation/widgets/paper_filter_chip.dart';
 
 class CategoryChip extends StatelessWidget {
   final ItemCategory category;
@@ -16,29 +17,11 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = category.color;
-
-    return GestureDetector(
+    return PaperFilterChip(
+      label: category.label,
+      selected: selected,
+      accent: category.color,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? color : color.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? color : color.withValues(alpha: 0.3),
-          ),
-        ),
-        child: Text(
-          category.label,
-          style: TextStyle(
-            color: selected ? Colors.white : color,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
     );
   }
 }

@@ -135,8 +135,8 @@ class _PosterImageWidgetState extends ConsumerState<PosterImageWidget> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withValues(alpha: 0.3),
-            AppColors.surface.withValues(alpha: 0.8),
+            color.withValues(alpha: 0.18),
+            AppColors.paperBg,
           ],
         ),
         borderRadius: widget.borderRadius,

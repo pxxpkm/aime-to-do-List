@@ -34,24 +34,27 @@ class ItemSortService {
 
   List<Item> sort(List<Item> input, HomeSortMode mode) {
     final list = List<Item>.from(input);
-    switch (mode) {
-      case HomeSortMode.manual:
-        list.sort(_manual);
-      case HomeSortMode.deadline:
-        list.sort(_deadline);
-      case HomeSortMode.updated:
-        list.sort(_updated);
-      case HomeSortMode.created:
-        list.sort(_created);
-      case HomeSortMode.title:
-        list.sort(_title);
-      case HomeSortMode.siteScore:
-        list.sort(_siteScore);
-      case HomeSortMode.myScore:
-        list.sort(_myScore);
-      case HomeSortMode.progress:
-        list.sort(_progress);
-    }
+    int modeCompare(Item a, Item b) => switch (mode) {
+          HomeSortMode.manual => _manual(a, b),
+          HomeSortMode.deadline => _deadline(a, b),
+          HomeSortMode.updated => _updated(a, b),
+          HomeSortMode.created => _created(a, b),
+          HomeSortMode.title => _title(a, b),
+          HomeSortMode.siteScore => _siteScore(a, b),
+          HomeSortMode.myScore => _myScore(a, b),
+          HomeSortMode.progress => _progress(a, b),
+        };
+    list.sort((a, b) {
+      // watching → priority → none; within tier by pinOrder.
+      final tr = a.pinTier.sortRank.compareTo(b.pinTier.sortRank);
+      if (tr != 0) return tr;
+      if (a.pinTier.isPinned && b.pinTier.isPinned) {
+        final p = a.pinOrder.compareTo(b.pinOrder);
+        if (p != 0) return p;
+        return a.id.compareTo(b.id);
+      }
+      return modeCompare(a, b);
+    });
     return list;
   }
 

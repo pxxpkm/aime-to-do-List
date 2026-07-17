@@ -7,6 +7,7 @@ import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/system_folders.dart';
 import 'package:acg_todo/presentation/providers/folders_provider.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
+import 'package:acg_todo/presentation/widgets/paper_filter_chip.dart';
 
 class FolderChipBar extends ConsumerWidget {
   /// null = all, [kFolderFilterUncategorized] = uncategorized, else folder id
@@ -154,7 +155,7 @@ class FolderChipBar extends ConsumerWidget {
     }
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.paperElevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -267,45 +268,14 @@ class _FolderChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return PaperFilterChip(
+      label: label,
+      selected: selected,
+      accent: color,
       onTap: onTap,
       onLongPress: onLongPress,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected
-              ? color.withValues(alpha: 0.3)
-              : color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? color : color.withValues(alpha: 0.25),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.folder_outlined, size: 14, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.white : color.withValues(alpha: 0.9),
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '$count',
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
-        ),
-      ),
+      icon: Icons.folder_outlined,
+      countLabel: '$count',
     );
   }
 }
@@ -317,32 +287,12 @@ class _AddFolderChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return PaperFilterChip(
+      label: '新建',
+      selected: false,
+      accent: AppColors.inkMuted,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.textMuted.withValues(alpha: 0.4),
-          ),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.add, size: 14, color: AppColors.textMuted),
-            SizedBox(width: 2),
-            Text(
-              '新建',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textMuted,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
+      icon: Icons.add,
     );
   }
 }

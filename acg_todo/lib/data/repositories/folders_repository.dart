@@ -1,16 +1,16 @@
 import 'package:acg_todo/core/utils/logger.dart';
-import 'package:acg_todo/data/local/hive_cache.dart';
+import 'package:acg_todo/data/local/library_store.dart';
 import 'package:acg_todo/domain/entities/folder.dart';
 import 'package:acg_todo/domain/entities/system_folders.dart';
 
 class FoldersRepository {
-  final HiveCache _cache;
+  final LibraryStore _store;
 
-  FoldersRepository(this._cache);
+  FoldersRepository(this._store);
 
-  List<Folder> getAll() => _cache.getAllFolders();
+  List<Folder> getAll() => _store.getAllFolders();
 
-  Folder? getById(String id) => _cache.getFolder(id);
+  Folder? getById(String id) => _store.getFolder(id);
 
   bool isSystemFolder(String id) => id == SystemFolders.completedId;
 
@@ -22,11 +22,11 @@ class FoldersRepository {
     final folder = Folder(
       id: 'folder_${DateTime.now().microsecondsSinceEpoch}',
       name: trimmed.length > 20 ? trimmed.substring(0, 20) : trimmed,
-      sortOrder: _cache.nextFolderSortOrder(),
+      sortOrder: _store.nextFolderSortOrder(),
       colorValue: colorValue,
       createdAt: DateTime.now(),
     );
-    await _cache.putFolder(folder);
+    await _store.putFolder(folder);
     Logger().i('Folder created: ${folder.name}');
     return folder;
   }
@@ -36,12 +36,12 @@ class FoldersRepository {
       Logger().w('Cannot rename system folder: $id');
       return;
     }
-    final folder = _cache.getFolder(id);
+    final folder = _store.getFolder(id);
     if (folder == null) return;
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
     final next = trimmed.length > 20 ? trimmed.substring(0, 20) : trimmed;
-    await _cache.putFolder(folder.copyWith(name: next));
+    await _store.putFolder(folder.copyWith(name: next));
     Logger().d('Folder renamed: $id → $next');
   }
 
@@ -51,22 +51,22 @@ class FoldersRepository {
       Logger().w('Cannot delete system folder: $id');
       return;
     }
-    final items = _cache.getAllItems();
+    final items = _store.getAllItems();
     for (final item in items) {
       if (item.folderId == id) {
-        await _cache.putItem(item.copyWith(folderId: null));
+        await _store.putItem(item.copyWith(folderId: null));
       }
     }
-    await _cache.deleteFolder(id);
+    await _store.deleteFolder(id);
     Logger().i('Folder deleted: $id (items uncategorized)');
   }
 
   Future<void> reorder(List<String> orderedIds) async {
     for (var i = 0; i < orderedIds.length; i++) {
-      final folder = _cache.getFolder(orderedIds[i]);
+      final folder = _store.getFolder(orderedIds[i]);
       if (folder == null) continue;
       if (folder.sortOrder == i) continue;
-      await _cache.putFolder(folder.copyWith(sortOrder: i));
+      await _store.putFolder(folder.copyWith(sortOrder: i));
     }
   }
 }

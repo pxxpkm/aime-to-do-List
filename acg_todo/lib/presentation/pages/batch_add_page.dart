@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/core/utils/zh_convert.dart';
 import 'package:acg_todo/data/repositories/bangumi/bangumi_search_result.dart';
@@ -150,33 +151,31 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
   @override
   Widget build(BuildContext context) {
     final rows = _rows;
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => context.pop(),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        '批量新增',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+    return AppScaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.pop(),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      '批量新增',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
               if (rows == null) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -207,7 +206,7 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
                       decoration: InputDecoration(
                         hintText: '每行一個標題，最多 30 行\n例如：\n無職轉生\n藥屋少女的呢喃\n…',
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.06),
+                        fillColor: AppColors.paperElevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -238,7 +237,7 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
                     itemBuilder: (_, i) {
                       final row = rows[i];
                       return Card(
-                        color: Colors.white.withValues(alpha: 0.06),
+                        color: AppColors.paperElevated,
                         child: CheckboxListTile(
                           value: row.checked,
                           onChanged: row.selected == null || row.loading
@@ -307,7 +306,6 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
             ],
           ),
         ),
-      ),
     );
   }
 }

@@ -1,10 +1,16 @@
+// ignore_for_file: invalid_annotation_target
+
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:acg_todo/domain/entities/pin_tier.dart';
 
 part 'item.freezed.dart';
 part 'item.g.dart';
 
 @freezed
 class Item with _$Item {
+  const Item._();
+
   const factory Item({
     required String id,
     required String userId,
@@ -45,7 +51,23 @@ class Item with _$Item {
     double? userScore,
     /// Free-form user tags.
     @Default([]) List<String> tags,
+    /// none | watching | priority
+    @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson)
+    @Default(PinTier.none)
+    PinTier pinTier,
+    /// Order within the same [pinTier] (lower = first).
+    @Default(0) int pinOrder,
   }) = _Item;
 
   factory Item.fromJson(Map<String, dynamic> json) => _$ItemFromJson(json);
+
+  bool get isPinned => pinTier.isPinned;
 }
+
+PinTier pinTierFromJson(Object? json) {
+  if (json is String) return PinTier.fromStorage(json);
+  if (json is bool) return PinTier.fromStorage(null, legacyIsPinned: json);
+  return PinTier.none;
+}
+
+String pinTierToJson(PinTier t) => t.name;

@@ -5,6 +5,7 @@ import 'package:acg_todo/core/theme/app_colors.dart';
 import 'package:acg_todo/core/utils/score_utils.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
+import 'package:acg_todo/domain/entities/pin_tier.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
 import 'package:acg_todo/presentation/providers/repository_providers.dart';
 import 'package:acg_todo/presentation/widgets/tags_editor.dart';
@@ -17,7 +18,7 @@ Future<void> showItemEditorSheet(
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.surface,
+    backgroundColor: AppColors.paperElevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
@@ -159,6 +160,25 @@ class _ItemEditorBodyState extends ConsumerState<_ItemEditorBody> {
               onChanged: (v) {
                 if (v == null) return;
                 setState(() => _status = v);
+              },
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '置頂層級',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 6),
+            SegmentedButton<PinTier>(
+              segments: const [
+                ButtonSegment(value: PinTier.none, label: Text('無')),
+                ButtonSegment(value: PinTier.watching, label: Text('正在追')),
+                ButtonSegment(value: PinTier.priority, label: Text('優先追')),
+              ],
+              selected: {item.pinTier},
+              onSelectionChanged: (s) async {
+                await ref
+                    .read(itemsNotifierProvider.notifier)
+                    .setPinTier(item.id, s.first);
               },
             ),
             const SizedBox(height: 12),

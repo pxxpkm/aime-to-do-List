@@ -42,13 +42,19 @@ List<HomeCell> buildHomeCells({
   final cells = <HomeCell>[];
   Folder? completedFolder;
 
+  // Pin tiers drawn in HomePriorityBoard — exclude from mixed wall.
+  bool notPinned(Item i) => !i.isPinned;
+
   for (final folder in folders) {
     if (folder.id == SystemFolders.completedId) {
       completedFolder = folder;
       continue;
     }
     final inFolder = typed(
-      allItems.where((i) => i.folderId == folder.id && _isActive(i)),
+      allItems.where(
+        (i) =>
+            i.folderId == folder.id && _isActive(i) && notPinned(i),
+      ),
     ).toList();
     if (inFolder.isEmpty) continue;
     cells.add(FolderHomeCell(
@@ -75,46 +81,52 @@ List<HomeCell> buildHomeCells({
   }
 
   for (final item in typed(
-    allItems.where((i) => i.folderId == null && _isActive(i)),
+    allItems.where(
+      (i) => i.folderId == null && _isActive(i) && notPinned(i),
+    ),
   )) {
     cells.add(ItemHomeCell(item));
   }
   return cells;
 }
 
+/// Grid layout for library poster wall.
+/// Uses min card width so column count tracks window size continuously.
 ({int Function(double width) columns, double aspectRatio}) homeGridLayout(
   String density,
 ) {
+  // Poster-first cards use ~2:3 cover ratio.
+  const posterRatio = 0.67;
+
   switch (density) {
     case 'large':
+      // Gallery: larger cards, fewer columns
       return (
-        columns: (w) {
-          if (w < 520) return 2;
-          if (w < 900) return 3;
-          return 4;
-        },
-        aspectRatio: 0.58,
+        columns: (w) => _columnsForMinWidth(w, minCard: 220, maxCols: 6),
+        aspectRatio: posterRatio,
       );
     case 'comfortable':
       return (
-        columns: (w) {
-          if (w < 520) return 2;
-          if (w < 720) return 3;
-          if (w < 1000) return 4;
-          return 5;
-        },
-        aspectRatio: 0.64,
+        columns: (w) => _columnsForMinWidth(w, minCard: 180, maxCols: 8),
+        aspectRatio: posterRatio,
       );
     case 'compact':
     default:
       return (
-        columns: (w) {
-          if (w < 520) return 3;
-          if (w < 720) return 4;
-          if (w < 1000) return 5;
-          return 6;
-        },
-        aspectRatio: 0.72,
+        columns: (w) => _columnsForMinWidth(w, minCard: 140, maxCols: 10),
+        aspectRatio: posterRatio,
       );
   }
+}
+
+int _columnsForMinWidth(
+  double width, {
+  required double minCard,
+  required int maxCols,
+}) {
+  if (width <= 0 || !width.isFinite) return 2;
+  final n = (width / minCard).floor();
+  if (n < 2) return 2;
+  if (n > maxCols) return maxCols;
+  return n;
 }

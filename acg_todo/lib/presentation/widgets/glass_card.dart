@@ -1,7 +1,9 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
+import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_shadows.dart';
+
+/// Paper surface card (legacy name [GlassCard] kept for call sites).
 class GlassCard extends StatelessWidget {
   final Widget child;
   final double borderRadius;
@@ -12,7 +14,7 @@ class GlassCard extends StatelessWidget {
   const GlassCard({
     super.key,
     required this.child,
-    this.borderRadius = 16,
+    this.borderRadius = 20,
     this.blur = 10,
     this.padding,
     this.onTap,
@@ -20,38 +22,23 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Ink(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: AppColors.paperElevated,
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.12),
-              width: 1,
-            ),
+            border: Border.all(color: AppColors.borderSubtle),
+            boxShadow: AppShadows.soft,
           ),
-          child: Material(
-            color: Colors.transparent,
-            child: onTap != null
-                ? InkWell(
-                    onTap: onTap,
-                    borderRadius: BorderRadius.circular(borderRadius),
-                    child: _childWithPadding,
-                  )
-                : _childWithPadding,
-          ),
+          child: padding != null
+              ? Padding(padding: padding!, child: child)
+              : child,
         ),
       ),
     );
-  }
-
-  Widget get _childWithPadding {
-    if (padding != null) {
-      return Padding(padding: padding!, child: child);
-    }
-    return child;
   }
 }

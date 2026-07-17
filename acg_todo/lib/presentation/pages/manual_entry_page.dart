@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
@@ -68,33 +69,30 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => context.pop(),
+    return AppScaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.pop(),
+                  ),
+                  const Text(
+                    '手動建立',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const Text(
-                      '手動建立',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              Expanded(
+            Expanded(
                 child: ListView(
                   padding: const EdgeInsets.all(20),
                   children: [
@@ -144,7 +142,7 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                       decoration: InputDecoration(
                         hintText: '作品名稱',
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.08),
+                        fillColor: AppColors.paperElevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -163,7 +161,7 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                       decoration: InputDecoration(
                         hintText: 'https://...',
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.08),
+                        fillColor: AppColors.paperElevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -183,7 +181,7 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                       decoration: InputDecoration(
                         hintText: '例如：12',
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.08),
+                        fillColor: AppColors.paperElevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -202,7 +200,7 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: AppColors.paperElevated,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -216,7 +214,7 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                               style: TextStyle(
                                 color: _deadline != null
                                     ? Colors.white
-                                    : Colors.white.withValues(alpha: 0.4),
+                                    : AppColors.inkMuted,
                               ),
                             ),
                           ],
@@ -253,7 +251,6 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
             ],
           ),
         ),
-      ),
     );
   }
 }

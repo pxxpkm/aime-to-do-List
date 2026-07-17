@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/notification.dart';
 import 'package:acg_todo/domain/services/reminder_types.dart';
@@ -36,40 +37,38 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       grouped.putIfAbsent(n.type, () => []).add(n);
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => context.pop(),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        '通知中心',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+    return AppScaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.pop(),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      '通知中心',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (notifications.isNotEmpty)
-                      TextButton(
-                        onPressed: () => ref
-                            .read(notificationsNotifierProvider.notifier)
-                            .clearAll(),
-                        child: const Text('清除全部'),
-                      ),
-                  ],
-                ),
+                  ),
+                  if (notifications.isNotEmpty)
+                    TextButton(
+                      onPressed: () => ref
+                          .read(notificationsNotifierProvider.notifier)
+                          .clearAll(),
+                      child: const Text('清除全部'),
+                    ),
+                ],
               ),
-              Expanded(
+            ),
+            Expanded(
                 child: notifications.isEmpty
                     ? _emptyState()
                     : ListView(
@@ -103,7 +102,6 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -198,7 +196,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: AppColors.paperElevated,
         borderRadius: BorderRadius.circular(12),
         child: ListTile(
           title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -260,11 +258,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.notifications_none,
-              size: 64, color: Colors.white.withValues(alpha: 0.3)),
+              size: 64, color: AppColors.inkMuted),
           const SizedBox(height: 12),
           Text(
             '目前沒有通知',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+            style: const TextStyle(color: AppColors.inkMuted),
           ),
           const SizedBox(height: 8),
           TextButton(

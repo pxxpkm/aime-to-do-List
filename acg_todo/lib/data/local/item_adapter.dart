@@ -1,4 +1,5 @@
 import 'package:acg_todo/domain/entities/item.dart';
+import 'package:acg_todo/domain/entities/pin_tier.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class ItemAdapter extends TypeAdapter<Item> {
@@ -47,6 +48,11 @@ class ItemAdapter extends TypeAdapter<Item> {
       remark: fields['remark'] as String?,
       userScore: (fields['userScore'] as num?)?.toDouble(),
       tags: _readTags(fields['tags']),
+      pinTier: PinTier.fromStorage(
+        fields['pinTier'] as String?,
+        legacyIsPinned: fields['isPinned'] as bool?,
+      ),
+      pinOrder: fields['pinOrder'] as int? ?? 0,
     );
   }
 
@@ -90,6 +96,10 @@ class ItemAdapter extends TypeAdapter<Item> {
       'remark': obj.remark,
       'userScore': obj.userScore,
       'tags': obj.tags,
+      'pinTier': obj.pinTier.name,
+      'pinOrder': obj.pinOrder,
+      // Keep for older readers if any
+      'isPinned': obj.isPinned,
     });
   }
 }

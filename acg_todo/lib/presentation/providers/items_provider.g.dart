@@ -176,7 +176,7 @@ class _SearchMediaProviderElement
   MediaSource get source => (origin as SearchMediaProvider).source;
 }
 
-String _$itemsNotifierHash() => r'7e2bbd532b200c5807717715bb8fd45e58309feb';
+String _$itemsNotifierHash() => r'3a59703e80038f97a206bf6bf31cf2b7efa6e0dc';
 
 /// See also [ItemsNotifier].
 @ProviderFor(ItemsNotifier)

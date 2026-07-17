@@ -1,24 +1,24 @@
 import 'package:acg_todo/domain/entities/notification.dart';
-import 'package:acg_todo/data/local/notification_cache.dart';
+import 'package:acg_todo/data/local/notification_store.dart';
 
 class NotificationRepository {
-  final NotificationCache _cache;
+  final NotificationStore _store;
 
-  NotificationRepository(this._cache);
+  NotificationRepository(this._store);
 
-  List<AppNotification> getAll() => _cache.getAll();
+  List<AppNotification> getAll() => _store.getAll();
 
-  List<AppNotification> getUnsent() => _cache.getUnsent();
+  List<AppNotification> getUnsent() => _store.getUnsent();
 
   Future<void> schedule(AppNotification notification) async {
-    await _cache.put(notification);
+    await _store.put(notification);
   }
 
   Future<void> markSent(String id) async {
-    await _cache.markSent(id);
+    await _store.markSent(id);
   }
 
   Future<void> clearAll() async {
-    await _cache.clearAll();
+    await _store.clearAll();
   }
 }

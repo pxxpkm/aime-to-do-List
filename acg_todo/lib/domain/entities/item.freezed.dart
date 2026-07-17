@@ -70,6 +70,13 @@ mixin _$Item {
   /// Free-form user tags.
   List<String> get tags => throw _privateConstructorUsedError;
 
+  /// none | watching | priority
+  @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson)
+  PinTier get pinTier => throw _privateConstructorUsedError;
+
+  /// Order within the same [pinTier] (lower = first).
+  int get pinOrder => throw _privateConstructorUsedError;
+
   /// Serializes this Item to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -115,6 +122,8 @@ abstract class $ItemCopyWith<$Res> {
     String? remark,
     double? userScore,
     List<String> tags,
+    @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson) PinTier pinTier,
+    int pinOrder,
   });
 }
 
@@ -163,6 +172,8 @@ class _$ItemCopyWithImpl<$Res, $Val extends Item>
     Object? remark = freezed,
     Object? userScore = freezed,
     Object? tags = null,
+    Object? pinTier = null,
+    Object? pinOrder = null,
   }) {
     return _then(
       _value.copyWith(
@@ -286,6 +297,14 @@ class _$ItemCopyWithImpl<$Res, $Val extends Item>
                 ? _value.tags
                 : tags // ignore: cast_nullable_to_non_nullable
                       as List<String>,
+            pinTier: null == pinTier
+                ? _value.pinTier
+                : pinTier // ignore: cast_nullable_to_non_nullable
+                      as PinTier,
+            pinOrder: null == pinOrder
+                ? _value.pinOrder
+                : pinOrder // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -331,6 +350,8 @@ abstract class _$$ItemImplCopyWith<$Res> implements $ItemCopyWith<$Res> {
     String? remark,
     double? userScore,
     List<String> tags,
+    @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson) PinTier pinTier,
+    int pinOrder,
   });
 }
 
@@ -376,6 +397,8 @@ class __$$ItemImplCopyWithImpl<$Res>
     Object? remark = freezed,
     Object? userScore = freezed,
     Object? tags = null,
+    Object? pinTier = null,
+    Object? pinOrder = null,
   }) {
     return _then(
       _$ItemImpl(
@@ -499,6 +522,14 @@ class __$$ItemImplCopyWithImpl<$Res>
             ? _value._tags
             : tags // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        pinTier: null == pinTier
+            ? _value.pinTier
+            : pinTier // ignore: cast_nullable_to_non_nullable
+                  as PinTier,
+        pinOrder: null == pinOrder
+            ? _value.pinOrder
+            : pinOrder // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -506,7 +537,7 @@ class __$$ItemImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$ItemImpl implements _Item {
+class _$ItemImpl extends _Item {
   const _$ItemImpl({
     required this.id,
     required this.userId,
@@ -538,7 +569,11 @@ class _$ItemImpl implements _Item {
     this.remark,
     this.userScore,
     final List<String> tags = const [],
-  }) : _tags = tags;
+    @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson)
+    this.pinTier = PinTier.none,
+    this.pinOrder = 0,
+  }) : _tags = tags,
+       super._();
 
   factory _$ItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$ItemImplFromJson(json);
@@ -635,9 +670,19 @@ class _$ItemImpl implements _Item {
     return EqualUnmodifiableListView(_tags);
   }
 
+  /// none | watching | priority
+  @override
+  @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson)
+  final PinTier pinTier;
+
+  /// Order within the same [pinTier] (lower = first).
+  @override
+  @JsonKey()
+  final int pinOrder;
+
   @override
   String toString() {
-    return 'Item(id: $id, userId: $userId, type: $type, anilistId: $anilistId, title: $title, posterUrl: $posterUrl, totalUnits: $totalUnits, currentUnits: $currentUnits, unitLabel: $unitLabel, status: $status, deadline: $deadline, createdAt: $createdAt, completedAt: $completedAt, bookmarkUnits: $bookmarkUnits, sortOrder: $sortOrder, lastProgressAt: $lastProgressAt, folderId: $folderId, previousFolderId: $previousFolderId, deadlineRemindMode: $deadlineRemindMode, customDeadlineOffsets: $customDeadlineOffsets, score: $score, scoreCount: $scoreCount, summary: $summary, originalTitle: $originalTitle, airDate: $airDate, source: $source, externalUrl: $externalUrl, remark: $remark, userScore: $userScore, tags: $tags)';
+    return 'Item(id: $id, userId: $userId, type: $type, anilistId: $anilistId, title: $title, posterUrl: $posterUrl, totalUnits: $totalUnits, currentUnits: $currentUnits, unitLabel: $unitLabel, status: $status, deadline: $deadline, createdAt: $createdAt, completedAt: $completedAt, bookmarkUnits: $bookmarkUnits, sortOrder: $sortOrder, lastProgressAt: $lastProgressAt, folderId: $folderId, previousFolderId: $previousFolderId, deadlineRemindMode: $deadlineRemindMode, customDeadlineOffsets: $customDeadlineOffsets, score: $score, scoreCount: $scoreCount, summary: $summary, originalTitle: $originalTitle, airDate: $airDate, source: $source, externalUrl: $externalUrl, remark: $remark, userScore: $userScore, tags: $tags, pinTier: $pinTier, pinOrder: $pinOrder)';
   }
 
   @override
@@ -693,7 +738,10 @@ class _$ItemImpl implements _Item {
             (identical(other.remark, remark) || other.remark == remark) &&
             (identical(other.userScore, userScore) ||
                 other.userScore == userScore) &&
-            const DeepCollectionEquality().equals(other._tags, _tags));
+            const DeepCollectionEquality().equals(other._tags, _tags) &&
+            (identical(other.pinTier, pinTier) || other.pinTier == pinTier) &&
+            (identical(other.pinOrder, pinOrder) ||
+                other.pinOrder == pinOrder));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -730,6 +778,8 @@ class _$ItemImpl implements _Item {
     remark,
     userScore,
     const DeepCollectionEquality().hash(_tags),
+    pinTier,
+    pinOrder,
   ]);
 
   /// Create a copy of Item
@@ -746,7 +796,7 @@ class _$ItemImpl implements _Item {
   }
 }
 
-abstract class _Item implements Item {
+abstract class _Item extends Item {
   const factory _Item({
     required final String id,
     required final String userId,
@@ -778,7 +828,11 @@ abstract class _Item implements Item {
     final String? remark,
     final double? userScore,
     final List<String> tags,
+    @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson)
+    final PinTier pinTier,
+    final int pinOrder,
   }) = _$ItemImpl;
+  const _Item._() : super._();
 
   factory _Item.fromJson(Map<String, dynamic> json) = _$ItemImpl.fromJson;
 
@@ -860,6 +914,15 @@ abstract class _Item implements Item {
   /// Free-form user tags.
   @override
   List<String> get tags;
+
+  /// none | watching | priority
+  @override
+  @JsonKey(fromJson: pinTierFromJson, toJson: pinTierToJson)
+  PinTier get pinTier;
+
+  /// Order within the same [pinTier] (lower = first).
+  @override
+  int get pinOrder;
 
   /// Create a copy of Item
   /// with the given fields replaced by the non-null parameter values.

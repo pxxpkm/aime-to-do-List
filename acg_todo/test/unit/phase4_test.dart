@@ -92,10 +92,12 @@ void main() {
   });
 
   group('homeGridLayout', () {
-    test('compact has more columns on narrow', () {
+    test('compact denser than large; poster ratio', () {
       final c = homeGridLayout('compact');
-      expect(c.columns(400), 3);
-      expect(c.aspectRatio, 0.72);
+      final l = homeGridLayout('large');
+      expect(c.aspectRatio, closeTo(0.67, 0.01));
+      expect(c.columns(400), 2);
+      expect(c.columns(900), greaterThan(l.columns(900)));
     });
   });
 

@@ -1,4 +1,4 @@
-import 'package:acg_todo/data/local/notification_cache.dart';
+import 'package:acg_todo/data/local/notification_store.dart';
 import 'package:acg_todo/data/repositories/notification_repository.dart';
 import 'package:acg_todo/domain/entities/notification.dart';
 import 'package:acg_todo/domain/services/deadline_service.dart';
@@ -10,7 +10,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'notification_providers.g.dart';
 
-final notificationCacheProvider = Provider<NotificationCache>((ref) {
+/// Hive or SQLite-backed notification store (override in ProviderScope).
+final notificationCacheProvider = Provider<NotificationStore>((ref) {
   throw UnimplementedError('Override in ProviderScope');
 });
 
@@ -52,7 +53,7 @@ class NotificationsNotifier extends _$NotificationsNotifier {
   }
 
   NotificationRepository get _repo => ref.read(notificationRepositoryProvider);
-  NotificationCache get _cache => ref.read(notificationCacheProvider);
+  NotificationStore get _cache => ref.read(notificationCacheProvider);
 
   void _tick() {
     ref.read(notificationsTickProvider.notifier).state++;
@@ -90,7 +91,7 @@ final unreadNotificationsCountProvider = Provider<int>((ref) {
   return ref.watch(notificationCacheProvider).unreadCount();
 });
 
-final notificationSettingsProvider = Provider<NotificationCache>((ref) {
+final notificationSettingsProvider = Provider<NotificationStore>((ref) {
   ref.watch(notificationsTickProvider);
   return ref.watch(notificationCacheProvider);
 });

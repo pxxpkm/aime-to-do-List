@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/data/repositories/bangumi/bangumi_collection.dart';
 import 'package:acg_todo/data/repositories/bangumi/mappers.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
@@ -112,107 +113,102 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
       grouped.putIfAbsent(c.status, () => []).add(c);
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => context.pop(),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        '匯入收藏列表',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    if (_selected.isNotEmpty)
-                      TextButton(
-                        onPressed: _importing ? null : _importSelected,
-                        child: Text('匯入(${_selected.length})'),
-                      ),
-                  ],
-                ),
-              ),
-
-              // Category selector
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: DropdownButtonFormField<ItemCategory>(
-                  initialValue: _category,
-                  dropdownColor: AppColors.surface,
-                  decoration: InputDecoration(
-                    labelText: '分類',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.05),
+    return AppScaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.pop(),
                   ),
-                  items: ItemCategory.values
-                      .map((c) => DropdownMenuItem(
-                            value: c,
-                            child: Text(c.label),
-                          ))
-                      .toList(),
-                  onChanged: (c) {
-                    if (c != null) {
-                      setState(() => _category = c);
-                      _loadCollections();
-                    }
-                  },
+                  const Expanded(
+                    child: Text(
+                      '匯入收藏列表',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (_selected.isNotEmpty)
+                    TextButton(
+                      onPressed: _importing ? null : _importSelected,
+                      child: Text('匯入(${_selected.length})'),
+                    ),
+                ],
+              ),
+            ),
+
+            // Category selector
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: DropdownButtonFormField<ItemCategory>(
+                initialValue: _category,
+                dropdownColor: AppColors.paperElevated,
+                decoration: InputDecoration(
+                  labelText: '分類',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: AppColors.paperElevated,
                 ),
+                items: ItemCategory.values
+                    .map((c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(c.label),
+                        ))
+                    .toList(),
+                onChanged: (c) {
+                  if (c != null) {
+                    setState(() => _category = c);
+                    _loadCollections();
+                  }
+                },
               ),
+            ),
 
-              const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-              // Content
-              Expanded(
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _error != null
-                        ? Center(
-                            child: Text(_error!,
-                                style:
-                                    const TextStyle(color: AppColors.danger)),
-                          )
-                        : _collections.isEmpty
-                            ? Center(
-                                child: Text('此分類暫無收藏',
-                                    style: TextStyle(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.5))),
-                              )
-                            : ListView(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                children: [
-                                  ..._buildGroup(grouped, 2, '在看',
-                                      AppColors.anime),
-                                  ..._buildGroup(grouped, 1, '想看',
-                                      AppColors.lightNovel),
-                                  ..._buildGroup(grouped, 3, '看過',
-                                      AppColors.success),
-                                  ..._buildGroup(grouped, 4, '擱置',
-                                      AppColors.warning),
-                                  ..._buildGroup(grouped, 5, '拋棄',
-                                      AppColors.danger),
-                                  const SizedBox(height: 80),
-                                ],
+            // Content
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                      ? Center(
+                          child: Text(_error!,
+                              style: const TextStyle(color: AppColors.danger)),
+                        )
+                      : _collections.isEmpty
+                          ? const Center(
+                              child: Text(
+                                '此分類暫無收藏',
+                                style: TextStyle(color: AppColors.inkMuted),
                               ),
-              ),
-            ],
-          ),
+                            )
+                          : ListView(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              children: [
+                                ..._buildGroup(
+                                    grouped, 2, '在看', AppColors.anime),
+                                ..._buildGroup(
+                                    grouped, 1, '想看', AppColors.lightNovel),
+                                ..._buildGroup(
+                                    grouped, 3, '看過', AppColors.success),
+                                ..._buildGroup(
+                                    grouped, 4, '擱置', AppColors.warning),
+                                ..._buildGroup(
+                                    grouped, 5, '拋棄', AppColors.danger),
+                                const SizedBox(height: 80),
+                              ],
+                            ),
+            ),
+          ],
         ),
       ),
 
@@ -293,7 +289,7 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: AppColors.paperElevated,
         borderRadius: BorderRadius.circular(10),
         border: isSelected
             ? Border.all(color: AppColors.anime, width: 1)

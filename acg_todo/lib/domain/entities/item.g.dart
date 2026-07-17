@@ -47,6 +47,10 @@ _$ItemImpl _$$ItemImplFromJson(Map<String, dynamic> json) => _$ItemImpl(
   tags:
       (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
+  pinTier: json['pinTier'] == null
+      ? PinTier.none
+      : pinTierFromJson(json['pinTier']),
+  pinOrder: (json['pinOrder'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$ItemImplToJson(_$ItemImpl instance) =>
@@ -81,4 +85,6 @@ Map<String, dynamic> _$$ItemImplToJson(_$ItemImpl instance) =>
       'remark': instance.remark,
       'userScore': instance.userScore,
       'tags': instance.tags,
+      'pinTier': pinTierToJson(instance.pinTier),
+      'pinOrder': instance.pinOrder,
     };

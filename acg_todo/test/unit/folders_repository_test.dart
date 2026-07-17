@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:acg_todo/data/local/folder_adapter.dart';
 import 'package:acg_todo/data/local/goal_settings_store.dart';
 import 'package:acg_todo/data/local/hive_cache.dart';
+import 'package:acg_todo/data/local/hive_library_store.dart';
 import 'package:acg_todo/data/local/item_adapter.dart';
 import 'package:acg_todo/data/repositories/anilist/anilist_client.dart';
 import 'package:acg_todo/data/repositories/folders_repository.dart';
@@ -12,6 +13,7 @@ import 'package:acg_todo/domain/entities/item.dart';
 
 void main() {
   late HiveCache cache;
+  late HiveLibraryStore store;
   late FoldersRepository folders;
   late ItemsRepository items;
 
@@ -28,9 +30,11 @@ void main() {
     cache = HiveCache();
     // Manual open without full init side effects on shared path
     await cache.init();
-    folders = FoldersRepository(cache);
+    store = HiveLibraryStore(cache);
+    await store.hydrate();
+    folders = FoldersRepository(store);
     items = ItemsRepository(
-      cache,
+      store,
       AniListClient(),
       GoalSettingsStore(cache.settingsBox),
     );

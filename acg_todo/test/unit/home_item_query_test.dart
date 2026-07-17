@@ -27,7 +27,7 @@ Item _i({
 }
 
 void main() {
-  test('useMixedHomeLayout only all+manual', () {
+  test('useMixedHomeLayout only all+manual+no search', () {
     expect(
       useMixedHomeLayout(
         folderFilter: null,
@@ -49,6 +49,52 @@ void main() {
       ),
       isFalse,
     );
+    expect(
+      useMixedHomeLayout(
+        folderFilter: null,
+        sortMode: HomeSortMode.manual,
+        searchQuery: 'foo',
+      ),
+      isFalse,
+    );
+  });
+
+  test('itemMatchesQuery title tags remark', () {
+    final item = Item(
+      id: '1',
+      userId: 'u',
+      type: 'anime',
+      title: 'Steins Gate',
+      originalTitle: 'シュタインズ・ゲート',
+      tags: const ['科幻', '神作'],
+      remark: '看第二遍',
+    );
+    expect(itemMatchesQuery(item, ''), isTrue);
+    expect(itemMatchesQuery(item, 'steins'), isTrue);
+    expect(itemMatchesQuery(item, 'シュタ'), isTrue);
+    expect(itemMatchesQuery(item, '科幻'), isTrue);
+    expect(itemMatchesQuery(item, '第二'), isTrue);
+    expect(itemMatchesQuery(item, 'zzz'), isFalse);
+  });
+
+  test('searchQuery filters list', () {
+    final items = [
+      _i(id: '1', title: 'Alpha'),
+      _i(id: '2', title: 'Beta'),
+      Item(
+        id: '3',
+        userId: 'u',
+        type: 'anime',
+        title: 'Other',
+        tags: const ['alpha-tag'],
+      ),
+    ];
+    final out = filterAndSortHomeItems(
+      items: items,
+      sortMode: HomeSortMode.manual,
+      searchQuery: 'alpha',
+    );
+    expect(out.map((e) => e.id).toSet(), {'1', '3'});
   });
 
   test('all folders + title sorts active across folders', () {
@@ -105,5 +151,24 @@ void main() {
       folderFilter: kFolderFilterUncategorized,
     );
     expect(out.map((e) => e.id), ['a']);
+  });
+
+  test('parseLibraryFolderQuery maps none and ids', () {
+    expect(parseLibraryFolderQuery(null), isNull);
+    expect(parseLibraryFolderQuery(''), isNull);
+    expect(parseLibraryFolderQuery('none'), kFolderFilterUncategorized);
+    expect(parseLibraryFolderQuery(kFolderFilterUncategorized),
+        kFolderFilterUncategorized);
+    expect(parseLibraryFolderQuery('folder_1'), 'folder_1');
+  });
+
+  test('libraryFolderQueryParam and location', () {
+    expect(libraryFolderQueryParam(null), isNull);
+    expect(libraryFolderQueryParam(kFolderFilterUncategorized), 'none');
+    expect(libraryFolderQueryParam('folder_1'), 'folder_1');
+    expect(libraryLocationForFolder(null), '/library');
+    expect(libraryLocationForFolder(kFolderFilterUncategorized),
+        '/library?folder=none');
+    expect(libraryLocationForFolder('folder_1'), '/library?folder=folder_1');
   });
 }

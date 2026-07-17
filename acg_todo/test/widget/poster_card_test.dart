@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:acg_todo/domain/entities/item.dart';
@@ -17,21 +18,31 @@ void main() {
       unitLabel: '集',
     );
 
-    testWidgets('renders title and progress', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
+    Widget wrap(Widget child) {
+      return ProviderScope(
+        child: MaterialApp(
           home: Scaffold(
             body: SizedBox(
-              width: 160,
-              height: 240,
-              child: PosterCard(
-                item: mockItem,
-                onTap: () {},
-              ),
+              width: 180,
+              height: 320,
+              child: child,
             ),
           ),
         ),
       );
+    }
+
+    testWidgets('renders title and progress', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          PosterCard(
+            item: mockItem,
+            titleSimpToTrad: false,
+            onTap: () {},
+          ),
+        ),
+      );
+      await tester.pump();
 
       expect(find.text('Test Anime'), findsOneWidget);
       expect(find.text('6/12 集'), findsOneWidget);
@@ -41,19 +52,15 @@ void main() {
       final itemNoPoster = mockItem.copyWith(posterUrl: null);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 160,
-              height: 240,
-              child: PosterCard(
-                item: itemNoPoster,
-                onTap: () {},
-              ),
-            ),
+        wrap(
+          PosterCard(
+            item: itemNoPoster,
+            titleSimpToTrad: false,
+            onTap: () {},
           ),
         ),
       );
+      await tester.pump();
 
       expect(find.byIcon(Icons.movie_outlined), findsOneWidget);
     });
@@ -61,23 +68,36 @@ void main() {
     testWidgets('increment button fires callback', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 160,
-              height: 240,
-              child: PosterCard(
-                item: mockItem,
-                onTap: () {},
-                onIncrement: () => tapped = true,
-              ),
-            ),
+        wrap(
+          PosterCard(
+            item: mockItem,
+            titleSimpToTrad: false,
+            onTap: () {},
+            onIncrement: () => tapped = true,
           ),
         ),
       );
+      await tester.pump();
 
       await tester.tap(find.byIcon(Icons.add));
       expect(tapped, isTrue);
+    });
+
+    testWidgets('selected renders without crash', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          PosterCard(
+            item: mockItem,
+            titleSimpToTrad: false,
+            selected: true,
+            onTap: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Test Anime'), findsOneWidget);
+      expect(find.text('6/12 集'), findsOneWidget);
     });
   });
 }

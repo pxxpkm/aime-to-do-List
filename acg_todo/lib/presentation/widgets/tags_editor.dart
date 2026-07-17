@@ -62,7 +62,7 @@ class _TagsEditorState extends State<TagsEditor> {
                 label: Text(t, style: const TextStyle(fontSize: 12)),
                 onDeleted: () => _remove(t),
                 deleteIconColor: AppColors.textMuted,
-                backgroundColor: Colors.white.withValues(alpha: 0.08),
+                backgroundColor: AppColors.paperSurface,
               ),
           ],
         ),
@@ -73,7 +73,7 @@ class _TagsEditorState extends State<TagsEditor> {
             hintText: '新增標籤後按 Enter',
             isDense: true,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.06),
+            fillColor: AppColors.paperElevated,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,

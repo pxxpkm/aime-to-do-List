@@ -17,7 +17,7 @@ Future<void> showMoveToFolderSheet(
 
   await showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AppColors.surface,
+    backgroundColor: AppColors.paperElevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),

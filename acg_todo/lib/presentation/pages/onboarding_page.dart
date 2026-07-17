@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/presentation/providers/notification_providers.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -41,12 +42,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            children: [
+    return AppScaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
               // Skip button
               Align(
                 alignment: Alignment.topRight,
@@ -103,7 +102,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     decoration: BoxDecoration(
                       color: _currentPage == i
                           ? AppColors.anime
-                          : Colors.white.withValues(alpha: 0.2),
+                          : AppColors.borderSubtle,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -140,7 +139,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             ],
           ),
         ),
-      ),
     );
   }
 }

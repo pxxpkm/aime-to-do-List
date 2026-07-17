@@ -1,32 +1,39 @@
 import 'package:flutter/material.dart';
 
+/// Paper-gallery design tokens (warm light default).
 class AppColors {
-  // Background gradient
-  static const Color backgroundStart = Color(0xFF1a1a2e);
-  static const Color backgroundEnd = Color(0xFF16213e);
+  // Paper base
+  static const Color paperBg = Color(0xFFF6F1E8);
+  static const Color paperSurface = Color(0xFFFFFBF5);
+  static const Color paperElevated = Color(0xFFFFFFFF);
+  static const Color inkPrimary = Color(0xFF1F1A12);
+  static const Color inkSecondary = Color(0xFF5A4E40);
+  static const Color inkMuted = Color(0xFF7A6E5E);
+  static const Color divider = Color(0xFFE8DFD0);
+  static const Color borderSubtle = Color(0xFFE0D5C4);
 
-  // Surface
-  static const Color surface = Color(0xFF0f3460);
+  // Compatibility aliases (legacy dark names → paper semantics)
+  static const Color backgroundStart = paperBg;
+  static const Color backgroundEnd = Color(0xFFEFE6D8);
+  static const Color surface = paperSurface;
+  static const Color textPrimary = inkPrimary;
+  static const Color textSecondary = inkSecondary;
+  static const Color textMuted = inkMuted;
 
-  // Category accents
-  static const Color anime = Color(0xFFe94560);
-  static const Color manga = Color(0xFF0fb5d4);
-  static const Color lightNovel = Color(0xFFf5a623);
-  static const Color game = Color(0xFF9b59b6);
+  // Category accents (soft, non-neon)
+  static const Color anime = Color(0xFFD6455D);
+  static const Color manga = Color(0xFF2A9BB5);
+  static const Color lightNovel = Color(0xFFD4920A);
+  static const Color game = Color(0xFF7B5EA7);
 
   // Semantic
-  static const Color success = Color(0xFF4ade80);
-  static const Color warning = Color(0xFFfbbf24);
-  static const Color danger = Color(0xFFef4444);
-
-  // Text
-  static const Color textPrimary = Color(0xFFf8f9fa);
-  static const Color textSecondary = Color(0xFFadb5bd);
-  static const Color textMuted = Color(0xFF6c757d);
+  static const Color success = Color(0xFF3D9B6E);
+  static const Color warning = Color(0xFFD4A017);
+  static const Color danger = Color(0xFFC94C4C);
 
   static const LinearGradient backgroundGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
     colors: [backgroundStart, backgroundEnd],
   );
 

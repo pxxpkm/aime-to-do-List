@@ -13,8 +13,13 @@ Thumbs.db
 .env
 .env.*
 !.env.example
-**/*token*
 **/*secret*
+# Token *files* (credentials), not Dart source named *token_store*
+**/*token*.txt
+**/*token*.json
+**/*token*.pem
+!**/*token_store.dart
+!**/*token_store_test.dart
 
 # Flutter / Dart (also covered under acg_todo/.gitignore)
 **/.dart_tool/

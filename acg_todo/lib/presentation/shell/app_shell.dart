@@ -70,8 +70,9 @@ class AppShell extends StatelessWidget {
     final title = kShellDestinations[index.clamp(0, kShellDestinations.length - 1)]
         .label;
 
+    final p = context.palette;
     return Scaffold(
-      backgroundColor: context.palette.bg,
+      backgroundColor: p.bg,
       drawer: wide
           ? null
           : _ShellDrawer(
@@ -81,54 +82,60 @@ class AppShell extends StatelessWidget {
                 _go(i);
               },
             ),
-      body: Row(
-        children: [
-          if (wide)
-            _ShellRail(
-              selectedIndex: index,
-              onSelect: _go,
-            ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!wide)
-                  Material(
-                    color: context.palette.elevated,
-                    child: SafeArea(
-                      bottom: false,
-                      child: SizedBox(
-                        height: 52,
-                        child: Row(
-                          children: [
-                            Builder(
-                              builder: (ctx) => IconButton(
-                                icon: Icon(Icons.menu),
-                                color: context.palette.inkSecondary,
-                                onPressed: () =>
-                                    Scaffold.of(ctx).openDrawer(),
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: AppTypography.title.copyWith(
-                                  fontSize: 17,
+      body: DefaultTextStyle(
+        style: AppTypography.body.copyWith(color: p.ink),
+        child: IconTheme(
+          data: IconThemeData(color: p.inkSecondary),
+          child: Row(
+            children: [
+              if (wide)
+                _ShellRail(
+                  selectedIndex: index,
+                  onSelect: _go,
+                ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!wide)
+                      Material(
+                        color: p.elevated,
+                        child: SafeArea(
+                          bottom: false,
+                          child: SizedBox(
+                            height: 52,
+                            child: Row(
+                              children: [
+                                Builder(
+                                  builder: (ctx) => IconButton(
+                                    icon: const Icon(Icons.menu),
+                                    color: p.inkSecondary,
+                                    onPressed: () =>
+                                        Scaffold.of(ctx).openDrawer(),
+                                  ),
                                 ),
-                              ),
+                                Expanded(
+                                  child: Text(
+                                    title,
+                                    style: AppTypography.title.copyWith(
+                                      fontSize: 17,
+                                      color: p.ink,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                if (!wide)
-                  Divider(height: 1, color: context.palette.border),
-                Expanded(child: navigationShell),
-              ],
-            ),
+                    if (!wide) Divider(height: 1, color: p.border),
+                    Expanded(child: navigationShell),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_palette.dart';
+import 'package:acg_todo/core/theme/app_typography.dart';
 
 /// Unified paper-background scaffold for all app pages.
 ///
 /// Uses [context.palette] so light/dark (and future themes) switch safely.
-/// Default path remains paper light when theme extension is paper_light.
+/// Wraps [body] in [DefaultTextStyle] with palette ink so bare
+/// `AppTypography.*` (no baked color) stays readable in dark mode.
 class AppScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
   final Widget body;
@@ -44,7 +46,13 @@ class AppScaffold extends StatelessWidget {
           gradient: backgroundColor == null ? p.backgroundGradient : null,
           color: backgroundColor,
         ),
-        child: body,
+        child: DefaultTextStyle(
+          style: AppTypography.body.copyWith(color: p.ink),
+          child: IconTheme(
+            data: IconThemeData(color: p.inkSecondary),
+            child: body,
+          ),
+        ),
       ),
     );
   }

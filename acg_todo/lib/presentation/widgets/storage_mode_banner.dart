@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/web_hard_reload.dart';
 import 'package:acg_todo/data/local/library_backend_info.dart';
@@ -106,25 +107,25 @@ class _StorageModeBannerState extends ConsumerState<StorageModeBanner> {
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb || _dismissed) return const SizedBox.shrink();
+    if (!kIsWeb || _dismissed) return SizedBox.shrink();
     final info = ref.watch(libraryBackendInfoProvider);
-    if (info.isServer) return const SizedBox.shrink();
+    if (info.isServer) return SizedBox.shrink();
 
     final local = _isLocalDevHost;
 
     return Material(
-      color: AppColors.warning.withValues(alpha: 0.12),
+      color: context.palette.warning.withValues(alpha: 0.12),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 2),
               child: Icon(
                 Icons.info_outline,
                 size: 18,
-                color: AppColors.warning,
+                color: context.palette.warning,
               ),
             ),
             const SizedBox(width: 8),
@@ -140,7 +141,7 @@ class _StorageModeBannerState extends ConsumerState<StorageModeBanner> {
                         : '資料存在此瀏覽器（非雲端共用庫）。'
                             '清站或換裝置可能丟失作品 — 請定期「設定 → 匯出備份」。',
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.inkPrimary,
+                      color: context.palette.ink,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -153,7 +154,7 @@ class _StorageModeBannerState extends ConsumerState<StorageModeBanner> {
                           onPressed: _retrying ? null : _retryProbe,
                           style: TextButton.styleFrom(
                             visualDensity: VisualDensity.compact,
-                            foregroundColor: AppColors.anime,
+                            foregroundColor: context.palette.anime,
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                           ),
                           child: _retrying
@@ -164,23 +165,23 @@ class _StorageModeBannerState extends ConsumerState<StorageModeBanner> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('重試連線'),
+                              : Text('重試連線'),
                         )
                       else
                         TextButton(
                           onPressed: () => context.push('/settings'),
                           style: TextButton.styleFrom(
                             visualDensity: VisualDensity.compact,
-                            foregroundColor: AppColors.anime,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            foregroundColor: context.palette.anime,
+                            padding: EdgeInsets.symmetric(horizontal: 8),
                           ),
-                          child: const Text('匯出備份'),
+                          child: Text('匯出備份'),
                         ),
                       TextButton(
                         onPressed: _showHelp,
                         style: TextButton.styleFrom(
                           visualDensity: VisualDensity.compact,
-                          foregroundColor: AppColors.inkSecondary,
+                          foregroundColor: context.palette.inkSecondary,
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                         ),
                         child: const Text('說明'),

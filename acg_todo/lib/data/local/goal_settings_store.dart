@@ -23,6 +23,9 @@ class GoalSettingsStore {
   /// Library wall image fit: cover | contain
   static const _posterFitKey = 'poster_image_fit';
   static const _lastBackupAtKey = 'last_backup_at';
+  /// paper_light | paper_dark | future ids
+  static const _themeIdKey = 'theme_id';
+  static const _themeFollowSystemKey = 'theme_follow_system';
   static const _rollingDaysKey = 'goal_rolling_days';
   static const _rollingTargetKey = 'goal_rolling_target';
   static const _monthTargetKey = 'goal_month_target';
@@ -92,6 +95,8 @@ class GoalSettingsStore {
       _putLocal(_homeHeroItemIdKey, u['home_hero_item_id']);
       _putLocal(_posterFitKey, u['poster_image_fit']);
       _putLocal(_lastBackupAtKey, u['last_backup_at']);
+      _putLocal(_themeIdKey, u['theme_id']);
+      _putLocal(_themeFollowSystemKey, u['theme_follow_system']);
     }
     final days = settings['progressDays'];
     if (days is Map) {
@@ -302,6 +307,27 @@ class GoalSettingsStore {
     await _kv.put(_lastBackupAtKey, t.toIso8601String());
   }
 
+  /// Active theme id. Default [paper_light] keeps existing site appearance.
+  String get themeId {
+    final v = _kv.get(_themeIdKey) as String?;
+    if (v == null || v.isEmpty) return 'paper_light';
+    return v;
+  }
+
+  Future<void> setThemeId(String id) async {
+    final next = id.trim().isEmpty ? 'paper_light' : id.trim();
+    await _kv.put(_themeIdKey, next);
+  }
+
+  /// When true, OS light/dark picks paper_light / paper_dark (ignores fancy ids).
+  /// Default **false** so existing users never jump to dark unexpectedly.
+  bool get themeFollowSystem =>
+      _kv.get(_themeFollowSystemKey, defaultValue: false) as bool;
+
+  Future<void> setThemeFollowSystem(bool enabled) async {
+    await _kv.put(_themeFollowSystemKey, enabled);
+  }
+
   String dayKey([DateTime? now]) {
     final d = now ?? DateTime.now();
     final local = DateTime(d.year, d.month, d.day);
@@ -491,6 +517,8 @@ class GoalSettingsStore {
         'home_hero_item_id': homeHeroItemId ?? '',
         'poster_image_fit': posterImageFit,
         'last_backup_at': lastBackupAtIso ?? '',
+        'theme_id': themeId,
+        'theme_follow_system': themeFollowSystem,
       },
       'progressDays': progressDays,
     };
@@ -581,6 +609,11 @@ class GoalSettingsStore {
       final lastBak = u['last_backup_at'];
       if (lastBak is String && lastBak.isNotEmpty) {
         await _kv.put(_lastBackupAtKey, lastBak);
+      }
+      final tid = u['theme_id'];
+      if (tid is String && tid.isNotEmpty) await setThemeId(tid);
+      if (u['theme_follow_system'] is bool) {
+        await setThemeFollowSystem(u['theme_follow_system'] as bool);
       }
     }
   }

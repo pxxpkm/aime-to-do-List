@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/domain/services/reminder_types.dart';
 import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
@@ -29,7 +30,7 @@ Future<void> showDeadlineEditor(
   final result = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.paperElevated,
+    backgroundColor: context.palette.elevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),

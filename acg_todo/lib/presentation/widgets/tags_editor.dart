@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/utils/tag_utils.dart';
 
 class TagsEditor extends StatefulWidget {
@@ -59,21 +60,21 @@ class _TagsEditorState extends State<TagsEditor> {
           children: [
             for (final t in widget.tags)
               InputChip(
-                label: Text(t, style: const TextStyle(fontSize: 12)),
+                label: Text(t, style: TextStyle(fontSize: 12)),
                 onDeleted: () => _remove(t),
-                deleteIconColor: AppColors.textMuted,
-                backgroundColor: AppColors.paperSurface,
+                deleteIconColor: context.palette.inkMuted,
+                backgroundColor: context.palette.surface,
               ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: _controller,
           decoration: InputDecoration(
             hintText: '新增標籤後按 Enter',
             isDense: true,
             filled: true,
-            fillColor: AppColors.paperElevated,
+            fillColor: context.palette.elevated,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,

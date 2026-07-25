@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:acg_todo/core/notifications/web_browser_notification.dart';
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/data/local/library_backend_info.dart';
 import 'package:acg_todo/domain/services/reminder_types.dart';
@@ -111,45 +112,45 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           : Icons.web_asset_outlined,
                       onTap: () {},
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     // ── Bangumi 帳號 ──
-                    const _SectionTitle(title: 'Bangumi 帳號'),
-                    const SizedBox(height: 8),
+                    _SectionTitle(title: 'Bangumi 帳號'),
+                    SizedBox(height: 8),
 
                     if (bangumiState.isVerified) ...[
                       Material(
-                        color: AppColors.paperElevated,
+                        color: context.palette.elevated,
                         borderRadius: BorderRadius.circular(12),
                         child: ListTile(
                           leading:
-                              const Icon(Icons.check_circle, color: AppColors.success),
+                              Icon(Icons.check_circle, color: context.palette.success),
                           title: Text('已連結：${bangumiState.username ?? ""}'),
-                          subtitle: const Text('點擊取消連結',
+                          subtitle: Text('點擊取消連結',
                               style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 12)),
+                                  color: context.palette.inkMuted, fontSize: 12)),
                           onTap: () => ref
                               .read(bangumiNotifierProvider.notifier)
                               .clearToken(),
                         ),
                       ),
                       if (tokenStore.canPersistToDisk) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Material(
-                          color: AppColors.paperElevated,
+                          color: context.palette.elevated,
                           borderRadius: BorderRadius.circular(12),
                           child: SwitchListTile(
-                            secondary: const Icon(
+                            secondary: Icon(
                               Icons.save_outlined,
-                              color: AppColors.manga,
+                              color: context.palette.manga,
                             ),
-                            title: const Text('Token 存到磁碟庫'),
+                            title: Text('Token 存到磁碟庫'),
                             subtitle: Text(
                               tokenStore.persistToDisk
                                   ? '已寫入 library.db 設定（清瀏覽器仍保留）'
                                   : '預設只在瀏覽器；開啟後一併寫入磁碟（opt-in）',
-                              style: const TextStyle(
-                                color: AppColors.textMuted,
+                              style: TextStyle(
+                                color: context.palette.inkMuted,
                                 fontSize: 12,
                               ),
                             ),
@@ -171,23 +172,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Material(
-                        color: AppColors.paperElevated,
+                        color: context.palette.elevated,
                         borderRadius: BorderRadius.circular(12),
                         child: ListTile(
                           leading:
-                              const Icon(Icons.download, color: AppColors.game),
-                          title: const Text('匯入我的收藏列表'),
-                          subtitle: const Text('從 Bangumi 匯入你的想看/在看/看過',
+                              Icon(Icons.download, color: context.palette.game),
+                          title: Text('匯入我的收藏列表'),
+                          subtitle: Text('從 Bangumi 匯入你的想看/在看/看過',
                               style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 12)),
+                                  color: context.palette.inkMuted, fontSize: 12)),
                           onTap: () => context.push('/import-collection'),
                         ),
                       ),
                     ] else ...[
                       Material(
-                        color: AppColors.paperElevated,
+                        color: context.palette.elevated,
                         borderRadius: BorderRadius.circular(12),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -212,10 +213,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 ),
                                 filled: true,
                                 fillColor:
-                                    AppColors.paperElevated,
+                                    context.palette.elevated,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             SizedBox(
                               height: 44,
                               child: ElevatedButton(
@@ -223,7 +224,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     ? null
                                     : _verifyToken,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.lightNovel,
+                                  backgroundColor: context.palette.lightNovel,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius:
@@ -245,11 +246,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               ),
                             ),
                             if (bangumiState.error != null) ...[
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
                               Text(
                                 bangumiState.error!,
-                                style: const TextStyle(
-                                    color: AppColors.danger, fontSize: 12),
+                                style: TextStyle(
+                                    color: context.palette.danger, fontSize: 12),
                               ),
                             ],
                             const SizedBox(height: 8),
@@ -266,6 +267,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                     ],
 
+                    const SizedBox(height: 32),
+
+                    // ── 外觀（主題）──
+                    const _SectionTitle(title: '外觀'),
+                    const SizedBox(height: 8),
+                    const _ThemeSettingsPanel(),
                     const SizedBox(height: 32),
 
                     // ── 進度目標 ──
@@ -355,12 +362,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('取消'),
+                                child: Text('取消'),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, true),
                                 style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.danger,
+                                  foregroundColor: context.palette.danger,
                                 ),
                                 child: const Text('清除'),
                               ),
@@ -450,11 +457,90 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.bold,
-        color: AppColors.textSecondary,
+        color: context.palette.inkSecondary,
         letterSpacing: 0.5,
+      ),
+    );
+  }
+}
+
+/// Theme picker — default paper_light; dark opt-in; system follow optional.
+class _ThemeSettingsPanel extends ConsumerWidget {
+  const _ThemeSettingsPanel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final store = ref.watch(goalSettingsStoreProvider);
+    ref.watch(dailyGoalTickProvider);
+    final follow = store.themeFollowSystem;
+    final id = store.themeId;
+    final resolvedId = follow
+        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+            ? AppPalette.paperDarkId
+            : AppPalette.paperLightId)
+        : id;
+
+    void tick() => ref.read(dailyGoalTickProvider.notifier).state++;
+
+    return Material(
+      color: context.palette.elevated,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.palette_outlined,
+                    color: context.palette.anime, size: 20),
+                const SizedBox(width: 8),
+                const Text('顏色主題',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SegmentedButton<String>(
+              segments: [
+                for (final p in AppPalette.registry.values)
+                  ButtonSegment(value: p.id, label: Text(p.label)),
+              ],
+              selected: {follow ? resolvedId : AppPalette.byId(id).id},
+              onSelectionChanged: follow
+                  ? (_) {}
+                  : (s) async {
+                      await store.setThemeId(s.first);
+                      tick();
+                    },
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('跟隨系統淺色/深色'),
+              subtitle: Text(
+                follow
+                    ? '已開啟：會在紙感淺色與深色畫廊間切換'
+                    : '關閉時使用上方手動選擇（預設淺色，不影響現有網站）',
+                style: TextStyle(
+                    fontSize: 12, color: context.palette.inkMuted),
+              ),
+              value: follow,
+              onChanged: (v) async {
+                await store.setThemeFollowSystem(v);
+                tick();
+              },
+            ),
+            Text(
+              '預設為淺色紙感。深色為可選；海報上的白字/黑漸層不跟主題改變。'
+              '多數畫面已跟主題切換。',
+              style:
+                  TextStyle(fontSize: 12, color: context.palette.inkMuted),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -577,15 +663,15 @@ class _GoalStepperTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final on = enabled ?? true;
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+        padding: EdgeInsets.fromLTRB(12, 8, 4, 8),
         child: Column(
           children: [
             Row(
               children: [
-                Icon(icon, color: AppColors.anime, size: 20),
+                Icon(icon, color: context.palette.anime, size: 20),
                 const SizedBox(width: 8),
                 Expanded(child: Text(title)),
                 if (onToggle != null)
@@ -626,14 +712,14 @@ class _SearchT2sSetting extends ConsumerWidget {
     ref.watch(dailyGoalTickProvider);
     final on = store.searchTradToSimp;
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       borderRadius: BorderRadius.circular(12),
       child: SwitchListTile(
-        secondary: const Icon(Icons.translate, color: AppColors.manga),
-        title: const Text('Bangumi 搜尋繁轉簡'),
-        subtitle: const Text(
+        secondary: Icon(Icons.translate, color: context.palette.manga),
+        title: Text('Bangumi 搜尋繁轉簡'),
+        subtitle: Text(
           '繁體關鍵字自動轉簡體再搜尋',
-          style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+          style: TextStyle(color: context.palette.inkMuted, fontSize: 12),
         ),
         value: on,
         onChanged: (v) async {
@@ -654,14 +740,14 @@ class _TitleS2tSetting extends ConsumerWidget {
     ref.watch(dailyGoalTickProvider);
     final on = store.titleSimpToTrad;
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       borderRadius: BorderRadius.circular(12),
       child: SwitchListTile(
-        secondary: const Icon(Icons.title, color: AppColors.lightNovel),
-        title: const Text('標題簡轉繁'),
-        subtitle: const Text(
+        secondary: Icon(Icons.title, color: context.palette.lightNovel),
+        title: Text('標題簡轉繁'),
+        subtitle: Text(
           '新增與顯示時把簡體標題轉成繁體',
-          style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+          style: TextStyle(color: context.palette.inkMuted, fontSize: 12),
         ),
         value: on,
         onChanged: (v) async {
@@ -683,16 +769,16 @@ class _HomeDensitySetting extends ConsumerWidget {
     final density = store.homeGridDensity;
 
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.grid_view, color: AppColors.manga, size: 20),
+                Icon(Icons.grid_view, color: context.palette.manga, size: 20),
                 SizedBox(width: 8),
                 Text('媒體庫海報大小', style: TextStyle(fontWeight: FontWeight.w600)),
               ],
@@ -710,10 +796,10 @@ class _HomeDensitySetting extends ConsumerWidget {
                 ref.read(dailyGoalTickProvider.notifier).state++;
               },
             ),
-            const SizedBox(height: 16),
-            const Row(
+            SizedBox(height: 16),
+            Row(
               children: [
-                Icon(Icons.crop_free, color: AppColors.manga, size: 20),
+                Icon(Icons.crop_free, color: context.palette.manga, size: 20),
                 SizedBox(width: 8),
                 Text('媒體庫海報裁切', style: TextStyle(fontWeight: FontWeight.w600)),
               ],
@@ -730,15 +816,15 @@ class _HomeDensitySetting extends ConsumerWidget {
                 ref.read(dailyGoalTickProvider.notifier).state++;
               },
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Text(
               '僅影響媒體庫海報牆。主頁大海報 / 抽海報維持填滿。',
-              style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
+              style: TextStyle(fontSize: 12, color: context.palette.inkMuted),
             ),
-            const SizedBox(height: 16),
-            const Row(
+            SizedBox(height: 16),
+            Row(
               children: [
-                Icon(Icons.image_outlined, color: AppColors.anime, size: 20),
+                Icon(Icons.image_outlined, color: context.palette.anime, size: 20),
                 SizedBox(width: 8),
                 Text('主頁大海報', style: TextStyle(fontWeight: FontWeight.w600)),
               ],
@@ -756,10 +842,10 @@ class _HomeDensitySetting extends ConsumerWidget {
                 ref.read(dailyGoalTickProvider.notifier).state++;
               },
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Text(
               '固定：主頁海報「固定」鈕或抽海報「設為主頁海報」。箭嘴/滑動只瀏覽，不改釘選。',
-              style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
+              style: TextStyle(fontSize: 12, color: context.palette.inkMuted),
             ),
           ],
         ),
@@ -817,20 +903,20 @@ class _NotificationSettingsPanel extends ConsumerWidget {
               : null,
         ),
         if (deadline && master) ...[
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Material(
-            color: AppColors.paperElevated,
+            color: context.palette.elevated,
             borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     '提醒日（距到期還剩）',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.palette.inkSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -885,17 +971,17 @@ class _NotificationSettingsPanel extends ConsumerWidget {
               : null,
         ),
         if (stale && master) ...[
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Material(
-            color: AppColors.paperElevated,
+            color: context.palette.elevated,
             borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+              padding: EdgeInsets.fromLTRB(16, 4, 8, 4),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text('停滯天數',
-                        style: TextStyle(color: AppColors.textSecondary)),
+                        style: TextStyle(color: context.palette.inkSecondary)),
                   ),
                   IconButton(
                     onPressed: staleDays <= 1
@@ -937,20 +1023,20 @@ class _NotificationSettingsPanel extends ConsumerWidget {
               : null,
         ),
         if (kIsWeb) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Material(
-            color: AppColors.paperElevated,
+            color: context.palette.elevated,
             borderRadius: BorderRadius.circular(12),
             child: ListTile(
-              leading: const Icon(Icons.web, color: AppColors.manga),
-              title: const Text('瀏覽器通知'),
+              leading: Icon(Icons.web, color: context.palette.manga),
+              title: Text('瀏覽器通知'),
               subtitle: Text(
                 _browserPermLabel(browserPerm),
-                style: const TextStyle(
-                    color: AppColors.textMuted, fontSize: 12),
+                style: TextStyle(
+                    color: context.palette.inkMuted, fontSize: 12),
               ),
               trailing: browserPerm == 'granted'
-                  ? const Icon(Icons.check_circle, color: AppColors.success)
+                  ? Icon(Icons.check_circle, color: context.palette.success)
                   : TextButton(
                       onPressed: () async {
                         final r =
@@ -979,16 +1065,16 @@ class _NotificationSettingsPanel extends ConsumerWidget {
             ),
           ),
         ],
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Material(
-          color: AppColors.paperElevated,
+          color: context.palette.elevated,
           borderRadius: BorderRadius.circular(12),
           child: ListTile(
-            leading: const Icon(Icons.refresh, color: AppColors.lightNovel),
-            title: const Text('立即檢查提醒'),
-            subtitle: const Text(
+            leading: Icon(Icons.refresh, color: context.palette.lightNovel),
+            title: Text('立即檢查提醒'),
+            subtitle: Text(
               '依目前作品與目標產生通知',
-              style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+              style: TextStyle(color: context.palette.inkMuted, fontSize: 12),
             ),
             onTap: () async {
               final n = await ref
@@ -1040,14 +1126,14 @@ class _SwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       borderRadius: BorderRadius.circular(12),
       child: SwitchListTile(
-        secondary: Icon(icon, color: AppColors.manga),
+        secondary: Icon(icon, color: context.palette.manga),
         title: Text(title),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+          style: TextStyle(color: context.palette.inkMuted, fontSize: 12),
         ),
         value: value,
         onChanged: onChanged,
@@ -1072,16 +1158,16 @@ class _SettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       borderRadius: BorderRadius.circular(12),
       child: ListTile(
-        leading: Icon(icon, color: AppColors.manga),
+        leading: Icon(icon, color: context.palette.manga),
         title: Text(title),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+          style: TextStyle(color: context.palette.inkMuted, fontSize: 12),
         ),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+        trailing: Icon(Icons.chevron_right, color: context.palette.inkMuted),
         onTap: onTap,
       ),
     );

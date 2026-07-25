@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/item_display.dart';
@@ -92,7 +93,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
     // Contain leaves letterbox — paper fill avoids harsh black bars.
     if (fit == BoxFit.contain) {
       image = ColoredBox(
-        color: AppColors.paperBg,
+        color: context.palette.bg,
         child: image,
       );
     }
@@ -114,7 +115,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
       s2t = ref.watch(goalSettingsStoreProvider).titleSimpToTrad;
     }
     final shownTitle = displayTitle(item.title, simpToTrad: s2t);
-    final color = AppColors.getTypeColor(item.type);
+    final color = context.palette.typeColor(item.type);
     final progress = item.totalUnits != null && item.totalUnits! > 0
         ? (item.currentUnits / item.totalUnits!).clamp(0.0, 1.0)
         : 0.0;
@@ -126,13 +127,13 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             : 12.0;
 
     final riskColor = switch (widget.continueRisk) {
-      ContinueRisk.overdue => AppColors.danger,
-      ContinueRisk.atRisk => AppColors.warning,
+      ContinueRisk.overdue => context.palette.danger,
+      ContinueRisk.atRisk => context.palette.warning,
       null => null,
     };
     final borderColor = widget.selected
-        ? AppColors.anime
-        : (riskColor ?? AppColors.borderSubtle);
+        ? context.palette.anime
+        : (riskColor ?? context.palette.border);
     final borderWidth = widget.selected
         ? 2.0
         : (riskColor != null ? 1.5 : 1.0);
@@ -151,7 +152,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
           child: Ink(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(radius),
-              color: AppColors.paperElevated,
+              color: context.palette.elevated,
               border: Border.all(
                 color: borderColor,
                 width: borderWidth,
@@ -216,8 +217,8 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             left: widget.onMenu != null ? 40 : 8,
             child: _PaperPill(
               background: (item.pinTier == PinTier.priority
-                      ? AppColors.lightNovel
-                      : AppColors.anime)
+                      ? context.palette.lightNovel
+                      : context.palette.anime)
                   .withValues(alpha: 0.92),
               child: Text(
                 item.pinTier.shortBadge,
@@ -230,18 +231,18 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             top: 6,
             left: 6,
             child: Material(
-              color: AppColors.paperElevated.withValues(alpha: 0.92),
+              color: context.palette.elevated.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(8),
               child: InkWell(
                 onTap: widget.onMenu,
                 borderRadius: BorderRadius.circular(8),
-                child: const SizedBox(
+                child: SizedBox(
                   width: 28,
                   height: 28,
                   child: Icon(
                     Icons.more_vert,
                     size: 16,
-                    color: AppColors.inkSecondary,
+                    color: context.palette.inkSecondary,
                   ),
                 ),
               ),
@@ -256,9 +257,9 @@ class _PosterCardState extends ConsumerState<PosterCard> {
               children: [
                 if (item.userScore != null)
                   _PaperPill(
-                    margin: const EdgeInsets.only(bottom: 4),
+                    margin: EdgeInsets.only(bottom: 4),
                     background:
-                        AppColors.lightNovel.withValues(alpha: 0.92),
+                        context.palette.lightNovel.withValues(alpha: 0.92),
                     child: Text(
                       '我 ${formatUserScore(item.userScore!)}',
                       style:
@@ -270,7 +271,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                     child: Text(
                       '★ ${item.score!.toStringAsFixed(1)}',
                       style: AppTypography.micro.copyWith(
-                        color: AppColors.lightNovel,
+                        color: context.palette.lightNovel,
                       ),
                     ),
                   ),
@@ -400,8 +401,8 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             left: pinLeft,
             child: _PaperPill(
               background: (item.pinTier == PinTier.priority
-                      ? AppColors.lightNovel
-                      : AppColors.anime)
+                      ? context.palette.lightNovel
+                      : context.palette.anime)
                   .withValues(alpha: 0.92),
               child: Text(
                 item.pinTier.shortBadge,
@@ -420,7 +421,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             top: item.deadline != null ? 28 : 4,
             right: 4,
             child: _PaperPill(
-              background: AppColors.warning.withValues(alpha: 0.92),
+              background: context.palette.warning.withValues(alpha: 0.92),
               child: Text(
                 '久未動',
                 style: AppTypography.micro.copyWith(
@@ -527,9 +528,9 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                     children: [
                       if (item.userScore != null)
                         _PaperPill(
-                          margin: const EdgeInsets.only(bottom: 4),
+                          margin: EdgeInsets.only(bottom: 4),
                           background:
-                              AppColors.lightNovel.withValues(alpha: 0.92),
+                              context.palette.lightNovel.withValues(alpha: 0.92),
                           child: Text(
                             '我 ${formatUserScore(item.userScore!)}',
                             style: AppTypography.micro
@@ -541,7 +542,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                           child: Text(
                             '★ ${item.score!.toStringAsFixed(1)}',
                             style: AppTypography.micro.copyWith(
-                              color: AppColors.lightNovel,
+                              color: context.palette.lightNovel,
                             ),
                           ),
                         ),
@@ -554,8 +555,8 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                   left: widget.onMenu != null ? 40 : 8,
                   child: _PaperPill(
                     background: (item.pinTier == PinTier.priority
-                            ? AppColors.lightNovel
-                            : AppColors.anime)
+                            ? context.palette.lightNovel
+                            : context.palette.anime)
                         .withValues(alpha: 0.92),
                     child: Text(
                       item.pinTier.shortBadge,
@@ -569,18 +570,18 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                   top: 6,
                   left: 6,
                   child: Material(
-                    color: AppColors.paperElevated.withValues(alpha: 0.92),
+                    color: context.palette.elevated.withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(8),
                     child: InkWell(
                       onTap: widget.onMenu,
                       borderRadius: BorderRadius.circular(8),
-                      child: const SizedBox(
+                      child: SizedBox(
                         width: 28,
                         height: 28,
                         child: Icon(
                           Icons.more_vert,
                           size: 16,
-                          color: AppColors.inkSecondary,
+                          color: context.palette.inkSecondary,
                         ),
                       ),
                     ),
@@ -591,10 +592,10 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                   bottom: 8,
                   right: 8,
                   child: _PaperPill(
-                    child: const Icon(
+                    child: Icon(
                       Icons.sticky_note_2_outlined,
                       size: 14,
-                      color: AppColors.inkSecondary,
+                      color: context.palette.inkSecondary,
                     ),
                   ),
                 ),
@@ -604,8 +605,8 @@ class _PosterCardState extends ConsumerState<PosterCard> {
         Expanded(
           flex: 28,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
-            color: AppColors.paperElevated,
+            padding: EdgeInsets.fromLTRB(8, 6, 6, 6),
+            color: context.palette.elevated,
             child: LayoutBuilder(
               builder: (context, meta) {
                 final showTags =
@@ -635,7 +636,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                     const Spacer(flex: 1),
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0, end: progress),
-                      duration: const Duration(milliseconds: 350),
+                      duration: Duration(milliseconds: 350),
                       curve: Curves.easeOutCubic,
                       builder: (context, value, _) {
                         return ClipRRect(
@@ -643,7 +644,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                           child: LinearProgressIndicator(
                             value: value,
                             minHeight: 3,
-                            backgroundColor: AppColors.divider,
+                            backgroundColor: context.palette.divider,
                             color: color,
                           ),
                         );
@@ -691,12 +692,12 @@ class _StripIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const _StripIconButton({required this.icon, required this.onTap});
+  _StripIconButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.paperElevated.withValues(alpha: 0.9),
+      color: context.palette.elevated.withValues(alpha: 0.9),
       borderRadius: BorderRadius.circular(6),
       child: InkWell(
         onTap: onTap,
@@ -704,7 +705,7 @@ class _StripIconButton extends StatelessWidget {
         child: SizedBox(
           width: 24,
           height: 24,
-          child: Icon(icon, size: 14, color: AppColors.inkSecondary),
+          child: Icon(icon, size: 14, color: context.palette.inkSecondary),
         ),
       ),
     );
@@ -726,12 +727,12 @@ class _PaperPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: background ?? AppColors.paperElevated.withValues(alpha: 0.94),
+        color: background ?? context.palette.elevated.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(8),
         border:
-            Border.all(color: AppColors.borderSubtle.withValues(alpha: 0.8)),
+            Border.all(color: context.palette.border.withValues(alpha: 0.8)),
         boxShadow: AppShadows.soft,
       ),
       child: child,

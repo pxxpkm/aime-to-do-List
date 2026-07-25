@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 
@@ -19,11 +20,11 @@ class LibraryPlaceholderPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('媒體庫', style: AppTypography.display.copyWith(fontSize: 24)),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 '下階段會把海報牆、篩選與批次操作移到這裡。',
                 style: AppTypography.body.copyWith(
-                  color: AppColors.inkSecondary,
+                  color: context.palette.inkSecondary,
                 ),
               ),
               const SizedBox(height: 24),

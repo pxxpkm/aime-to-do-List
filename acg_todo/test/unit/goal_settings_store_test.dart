@@ -95,4 +95,19 @@ void main() {
     expect(store.lastBackupAtIso, at.toIso8601String());
     expect(store.lastBackupAt, at);
   });
+
+  test('theme defaults paper_light and follow_system false', () {
+    expect(store.themeId, 'paper_light');
+    expect(store.themeFollowSystem, isFalse);
+  });
+
+  test('theme id and follow system persist', () async {
+    await store.setThemeId('paper_dark');
+    await store.setThemeFollowSystem(true);
+    expect(store.themeId, 'paper_dark');
+    expect(store.themeFollowSystem, isTrue);
+    final bundle = store.exportForBackup();
+    expect((bundle['ui'] as Map)['theme_id'], 'paper_dark');
+    expect((bundle['ui'] as Map)['theme_follow_system'], isTrue);
+  });
 }

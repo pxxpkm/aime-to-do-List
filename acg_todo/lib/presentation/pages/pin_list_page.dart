@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
@@ -88,11 +89,11 @@ class _PinListPageState extends ConsumerState<PinListPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: Text('取消'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('刪除', style: TextStyle(color: AppColors.danger)),
+            child: Text('刪除', style: TextStyle(color: context.palette.danger)),
           ),
         ],
       ),
@@ -107,7 +108,7 @@ class _PinListPageState extends ConsumerState<PinListPage> {
         : PinTier.watching;
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.paperElevated,
+      backgroundColor: context.palette.elevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -130,8 +131,8 @@ class _PinListPageState extends ConsumerState<PinListPage> {
                       ? Icons.play_circle_outline
                       : Icons.star_outline,
                   color: other == PinTier.watching
-                      ? AppColors.anime
-                      : AppColors.lightNovel,
+                      ? context.palette.anime
+                      : context.palette.lightNovel,
                 ),
                 title: Text('移到${other.label}'),
                 onTap: () {
@@ -140,18 +141,18 @@ class _PinListPageState extends ConsumerState<PinListPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.push_pin_outlined),
-                title: const Text('取消置頂'),
+                leading: Icon(Icons.push_pin_outlined),
+                title: Text('取消置頂'),
                 onTap: () {
                   Navigator.pop(ctx);
                   _setPinTier(item, PinTier.none);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: AppColors.danger),
-                title: const Text(
+                leading: Icon(Icons.delete_outline, color: context.palette.danger),
+                title: Text(
                   '刪除',
-                  style: TextStyle(color: AppColors.danger),
+                  style: TextStyle(color: context.palette.danger),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -183,8 +184,8 @@ class _PinListPageState extends ConsumerState<PinListPage> {
     final density = ref.watch(goalSettingsStoreProvider).homeGridDensity;
     final layout = homeGridLayout(density);
     final accent = widget.tier == PinTier.watching
-        ? AppColors.anime
-        : AppColors.lightNovel;
+        ? context.palette.anime
+        : context.palette.lightNovel;
 
     return AppScaffold(
       body: SafeArea(
@@ -286,13 +287,13 @@ class _PinListPageState extends ConsumerState<PinListPage> {
   Widget _emptyState(Color accent) {
     return Center(
       child: Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-        constraints: const BoxConstraints(maxWidth: 300),
+        margin: EdgeInsets.all(24),
+        padding: EdgeInsets.fromLTRB(24, 28, 24, 24),
+        constraints: BoxConstraints(maxWidth: 300),
         decoration: BoxDecoration(
-          color: AppColors.paperElevated,
+          color: context.palette.elevated,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.borderSubtle),
+          border: Border.all(color: context.palette.border),
           boxShadow: AppShadows.soft,
         ),
         child: Column(

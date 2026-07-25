@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/item_display.dart';
@@ -76,18 +77,18 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ),
                   TextButton.icon(
                     onPressed: () => context.push('/batch-add'),
-                    icon: const Icon(Icons.playlist_add, size: 18),
-                    label: const Text('批量'),
+                    icon: Icon(Icons.playlist_add, size: 18),
+                    label: Text('批量'),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.manga,
+                      foregroundColor: context.palette.manga,
                     ),
                   ),
                   TextButton.icon(
                     onPressed: () => context.push('/manual-entry'),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('手動'),
+                    icon: Icon(Icons.add, size: 18),
+                    label: Text('手動'),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.lightNovel,
+                      foregroundColor: context.palette.lightNovel,
                     ),
                   ),
                 ],
@@ -148,23 +149,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   decoration: InputDecoration(
                     hintText: '搜尋 ${facade.category.label}...',
                     hintStyle: AppTypography.body.copyWith(
-                      color: AppColors.inkMuted,
+                      color: context.palette.inkMuted,
                     ),
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search,
-                      color: AppColors.inkSecondary,
+                      color: context.palette.inkSecondary,
                     ),
                     filled: true,
-                    fillColor: AppColors.paperElevated,
+                    fillColor: context.palette.elevated,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide:
-                          const BorderSide(color: AppColors.borderSubtle),
+                          BorderSide(color: context.palette.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide:
-                          const BorderSide(color: AppColors.borderSubtle),
+                          BorderSide(color: context.palette.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -178,13 +179,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               ),
             if (facade.convertedQuery != null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                padding: EdgeInsets.fromLTRB(20, 6, 20, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '已轉簡體搜尋：${facade.convertedQuery}',
                     style: AppTypography.micro.copyWith(
-                      color: AppColors.inkMuted,
+                      color: context.palette.inkMuted,
                     ),
                   ),
                 ),

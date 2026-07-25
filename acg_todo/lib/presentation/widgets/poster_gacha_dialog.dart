@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/item_display.dart';
 import 'package:acg_todo/domain/entities/item.dart';
@@ -150,8 +151,8 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
     final s2t = ref.watch(goalSettingsStoreProvider).titleSimpToTrad;
     final shown = _display;
     final color = shown != null
-        ? AppColors.getTypeColor(shown.type)
-        : AppColors.anime;
+        ? context.palette.typeColor(shown.type)
+        : context.palette.anime;
     final title = shown != null
         ? displayTitle(shown.title, simpToTrad: s2t)
         : '';
@@ -199,7 +200,7 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                   children: [
                     // No scale > 1.0: AnimatedScale used to overflow into buttons.
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 280),
+                      duration: Duration(milliseconds: 280),
                       curve: Curves.easeOutCubic,
                       width: cardW,
                       height: cardH,
@@ -207,14 +208,14 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _result != null
-                              ? AppColors.anime
+                              ? context.palette.anime
                               : Colors.white24,
                           width: _result != null ? 2.5 : 1,
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: (_result != null
-                                    ? AppColors.anime
+                                    ? context.palette.anime
                                     : Colors.black)
                                 .withValues(alpha: _result != null ? 0.5 : 0.4),
                             blurRadius: _result != null ? 32 : 24,
@@ -289,8 +290,8 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                         gravity: 0.18,
                         colors: [
                           color,
-                          AppColors.lightNovel,
-                          AppColors.success,
+                          context.palette.lightNovel,
+                          context.palette.success,
                           const Color(0xFFE8B86D),
                         ],
                       ),

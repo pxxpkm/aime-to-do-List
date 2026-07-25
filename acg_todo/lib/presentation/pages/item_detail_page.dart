@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
@@ -137,12 +138,12 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
     final item = items.where((i) => i.id == widget.itemId).firstOrNull;
 
     if (item == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(child: Text('項目不存在')),
       );
     }
 
-    final color = AppColors.getTypeColor(item.type);
+    final color = context.palette.typeColor(item.type);
     final hasTotal = item.totalUnits != null && item.totalUnits! > 0;
     final total = hasTotal ? item.totalUnits! : null;
     final isComplete = hasTotal && item.currentUnits >= item.totalUnits!;
@@ -197,8 +198,8 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                 gravity: 0.15,
                 colors: [
                   color,
-                  AppColors.lightNovel,
-                  AppColors.success,
+                  context.palette.lightNovel,
+                  context.palette.success,
                   const Color(0xFFE8B86D),
                 ],
               ),
@@ -221,7 +222,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
 
   Widget _buildAppBar(Item item) {
     return Material(
-      color: AppColors.paperBg.withValues(alpha: 0.96),
+      color: context.palette.bg.withValues(alpha: 0.96),
       child: SizedBox(
         height: 52,
         child: Row(
@@ -425,7 +426,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
   Future<void> _pickStatus(Item item) async {
     final picked = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: AppColors.paperElevated,
+      backgroundColor: context.palette.elevated,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
         child: Column(
@@ -440,7 +441,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
               ListTile(
                 title: Text(_statusLabel(s)),
                 trailing: item.status == s
-                    ? const Icon(Icons.check, color: AppColors.success)
+                    ? Icon(Icons.check, color: context.palette.success)
                     : null,
                 onTap: () => Navigator.pop(ctx, s),
               ),
@@ -455,7 +456,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
   Future<void> _pickPin(Item item) async {
     final picked = await showModalBottomSheet<PinTier>(
       context: context,
-      backgroundColor: AppColors.paperElevated,
+      backgroundColor: context.palette.elevated,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
         child: Column(
@@ -468,7 +469,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                 ),
                 title: Text(t == PinTier.none ? '不釘選' : t.label),
                 trailing: item.pinTier == t
-                    ? const Icon(Icons.check, color: AppColors.success)
+                    ? Icon(Icons.check, color: context.palette.success)
                     : null,
                 onTap: () => Navigator.pop(ctx, t),
               ),
@@ -511,9 +512,9 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
               label: _statusLabel(item.status),
               selected: item.status == 'in_progress',
               accent: item.status == 'completed'
-                  ? AppColors.success
+                  ? context.palette.success
                   : item.status == 'dropped'
-                      ? AppColors.danger
+                      ? context.palette.danger
                       : color,
               onTap: () => _cycleStatus(item),
               onLongPress: () => _pickStatus(item),
@@ -523,7 +524,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                   ? '釘選'
                   : item.pinTier.label,
               selected: item.pinTier.isPinned,
-              accent: AppColors.lightNovel,
+              accent: context.palette.lightNovel,
               icon: item.pinTier.isPinned
                   ? Icons.push_pin
                   : Icons.push_pin_outlined,
@@ -544,7 +545,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
               PaperFilterChip(
                 label: item.airDate!,
                 selected: false,
-                accent: AppColors.inkMuted,
+                accent: context.palette.inkMuted,
               ),
             if (item.externalUrl != null)
               PaperFilterChip(
@@ -567,7 +568,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                   ? '我的 ${formatUserScore(item.userScore!)}'
                   : '我的評分',
               selected: item.userScore != null,
-              accent: AppColors.lightNovel,
+              accent: context.palette.lightNovel,
               onTap: () => showUserScoreEditor(context, ref, item: item),
             ),
             if (item.score != null)
@@ -576,7 +577,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                     '★ ${item.score!.toStringAsFixed(1)}'
                     '${item.scoreCount != null ? ' · ${item.scoreCount}' : ''}',
                 selected: false,
-                accent: AppColors.lightNovel,
+                accent: context.palette.lightNovel,
               ),
           ],
         ),
@@ -586,11 +587,11 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
           style: AppTypography.display.copyWith(fontSize: 22, height: 1.2),
         ),
         if (item.originalTitle != null && item.originalTitle!.isNotEmpty) ...[
-          const SizedBox(height: 2),
+          SizedBox(height: 2),
           Text(
             displayTitle(item.originalTitle!, simpToTrad: s2t),
             style: AppTypography.caption.copyWith(
-              color: AppColors.inkMuted,
+              color: context.palette.inkMuted,
               fontSize: 12,
             ),
           ),
@@ -649,7 +650,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const DetailSectionLabel('簡介'),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 item.summary!,
                 maxLines: _summaryExpanded ? 40 : 3,
@@ -657,7 +658,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                 style: AppTypography.body.copyWith(
                   fontSize: 13,
                   height: 1.4,
-                  color: AppColors.inkSecondary,
+                  color: context.palette.inkSecondary,
                 ),
               ),
               if (item.summary!.length > 100)
@@ -713,15 +714,15 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
             hintText: '進度備忘、連結、感想…',
             isDense: true,
             filled: true,
-            fillColor: AppColors.paperSurface,
-            contentPadding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            fillColor: context.palette.surface,
+            contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: AppColors.borderSubtle),
+              borderSide: BorderSide(color: context.palette.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: AppColors.borderSubtle),
+              borderSide: BorderSide(color: context.palette.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -734,7 +735,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
 
     final datesFooter = (item.createdAt != null || item.completedAt != null)
         ? Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: EdgeInsets.only(top: 6),
             child: Text(
               [
                 if (item.createdAt != null)
@@ -742,7 +743,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                 if (item.completedAt != null)
                   '完成 ${app_date.DateUtils.formatDate(item.completedAt!)}',
               ].join(' · '),
-              style: AppTypography.micro.copyWith(color: AppColors.inkMuted),
+              style: AppTypography.micro.copyWith(color: context.palette.inkMuted),
             ),
           )
         : null;
@@ -785,21 +786,21 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
 
     return DetailPaperSection(
       title: '詳情',
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: EdgeInsets.fromLTRB(12, 10, 12, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (summaryBlock != null) ...[
             summaryBlock,
-            const SizedBox(height: 10),
-            const Divider(height: 1, color: AppColors.divider),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
+            Divider(height: 1, color: context.palette.divider),
+            SizedBox(height: 10),
           ],
           tagsBlock,
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           remarkBlock,
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: AppColors.divider),
+          SizedBox(height: 12),
+          Divider(height: 1, color: context.palette.divider),
           const SizedBox(height: 10),
           manageGrid,
           if (datesFooter != null) datesFooter,
@@ -848,11 +849,11 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
     required bool isComplete,
   }) {
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       elevation: 0,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.divider)),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: context.palette.divider)),
           boxShadow: [
             BoxShadow(
               color: Color(0x122C2416),
@@ -896,21 +897,21 @@ class _ManageMiniCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.paperSurface,
+      color: context.palette.surface,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.borderSubtle),
+            border: Border.all(color: context.palette.border),
           ),
           child: Row(
             children: [
               Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -918,18 +919,18 @@ class _ManageMiniCard extends StatelessWidget {
                     Text(
                       title,
                       style: AppTypography.micro.copyWith(
-                        color: AppColors.inkMuted,
+                        color: context.palette.inkMuted,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2),
                     Text(
                       subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.caption.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.inkPrimary,
+                        color: context.palette.ink,
                       ),
                     ),
                   ],
@@ -971,7 +972,7 @@ class _PosterPane extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.borderSubtle),
+            border: Border.all(color: context.palette.border),
             boxShadow: AppShadows.card,
           ),
           child: ClipRRect(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/domain/entities/item.dart';
@@ -49,23 +50,23 @@ class DetailProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+      padding: EdgeInsets.fromLTRB(12, 10, 10, 10),
       decoration: BoxDecoration(
-        color: AppColors.paperElevated,
+        color: context.palette.elevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.palette.border),
         boxShadow: AppShadows.soft,
       ),
       child: LayoutBuilder(
         builder: (context, c) {
           final horizontal = c.maxWidth >= 340;
-          return horizontal ? _buildHorizontal() : _buildVertical();
+          return horizontal ? _buildHorizontal(context) : _buildVertical(context);
         },
       ),
     );
   }
 
-  Widget _buildHorizontal() {
+  Widget _buildHorizontal(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -77,7 +78,7 @@ class DetailProgressCard extends StatelessWidget {
               size: 56,
               strokeWidth: 5.5,
               color: color,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.palette.divider,
               duration: const Duration(milliseconds: 350),
               child: Text(
                 hasTotal ? '${(_progress * 100).round()}' : '—',
@@ -118,7 +119,7 @@ class DetailProgressCard extends StatelessWidget {
                         icon: Icon(
                           Icons.tune_rounded,
                           size: 18,
-                          color: AppColors.inkSecondary,
+                          color: context.palette.inkSecondary,
                         ),
                       ),
                     ],
@@ -128,7 +129,7 @@ class DetailProgressCard extends StatelessWidget {
                       data: SliderThemeData(
                         trackHeight: 3.5,
                         activeTrackColor: color,
-                        inactiveTrackColor: AppColors.divider,
+                        inactiveTrackColor: context.palette.divider,
                         thumbColor: color,
                         overlayShape: SliderComponentShape.noOverlay,
                         thumbShape: const RoundSliderThumbShape(
@@ -147,7 +148,7 @@ class DetailProgressCard extends StatelessWidget {
                     Text(
                       '總量未知 · 點右側設定',
                       style: AppTypography.micro.copyWith(
-                        color: AppColors.inkMuted,
+                        color: context.palette.inkMuted,
                       ),
                     ),
                 ],
@@ -175,13 +176,13 @@ class DetailProgressCard extends StatelessWidget {
         ),
         if (_hasMetaRow) ...[
           const SizedBox(height: 8),
-          _metaRow(),
+          _metaRow(context),
         ],
       ],
     );
   }
 
-  Widget _buildVertical() {
+  Widget _buildVertical(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -192,7 +193,7 @@ class DetailProgressCard extends StatelessWidget {
               size: 48,
               strokeWidth: 5,
               color: color,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.palette.divider,
               duration: const Duration(milliseconds: 350),
               child: Text(
                 hasTotal ? '${(_progress * 100).round()}' : '—',
@@ -227,7 +228,7 @@ class DetailProgressCard extends StatelessWidget {
             data: SliderThemeData(
               trackHeight: 3.5,
               activeTrackColor: color,
-              inactiveTrackColor: AppColors.divider,
+              inactiveTrackColor: context.palette.divider,
               thumbColor: color,
               overlayShape: SliderComponentShape.noOverlay,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
@@ -241,10 +242,10 @@ class DetailProgressCard extends StatelessWidget {
           )
         else
           Padding(
-            padding: const EdgeInsets.only(top: 4),
+            padding: EdgeInsets.only(top: 4),
             child: Text(
               '總量未知 · 點右側設定後可用滑桿',
-              style: AppTypography.micro.copyWith(color: AppColors.inkMuted),
+              style: AppTypography.micro.copyWith(color: context.palette.inkMuted),
             ),
           ),
         Row(
@@ -267,7 +268,7 @@ class DetailProgressCard extends StatelessWidget {
         ),
         if (_hasMetaRow) ...[
           const SizedBox(height: 6),
-          _metaRow(),
+          _metaRow(context),
         ],
       ],
     );
@@ -278,7 +279,7 @@ class DetailProgressCard extends StatelessWidget {
       item.bookmarkUnits != null ||
       onBookmarkHere != null;
 
-  Widget _metaRow() {
+  Widget _metaRow(BuildContext context) {
     return Wrap(
       spacing: 8,
       runSpacing: 4,
@@ -287,15 +288,15 @@ class DetailProgressCard extends StatelessWidget {
         if (lastProgressLabel != null)
           Text(
             lastProgressLabel!,
-            style: AppTypography.micro.copyWith(color: AppColors.inkMuted),
+            style: AppTypography.micro.copyWith(color: context.palette.inkMuted),
           ),
         if (item.bookmarkUnits != null)
           TextButton(
             onPressed: onJumpToBookmark,
             style: TextButton.styleFrom(
               visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              foregroundColor: AppColors.inkSecondary,
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              foregroundColor: context.palette.inkSecondary,
             ),
             child: Text(
               '書籤 ${item.bookmarkUnits}',
@@ -347,11 +348,11 @@ class _ProgressStepButtonState extends State<_ProgressStepButton> {
 
     return AnimatedScale(
       scale: _pressed && enabled ? 0.94 : 1,
-      duration: const Duration(milliseconds: 120),
+      duration: Duration(milliseconds: 120),
       child: Material(
         color: enabled
             ? widget.color.withValues(alpha: 0.12)
-            : AppColors.paperSurface,
+            : context.palette.surface,
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),
@@ -368,13 +369,13 @@ class _ProgressStepButtonState extends State<_ProgressStepButton> {
               border: Border.all(
                 color: enabled
                     ? widget.color.withValues(alpha: 0.45)
-                    : AppColors.borderSubtle,
+                    : context.palette.border,
               ),
             ),
             child: Icon(
               widget.icon,
               size: widget.compact ? 18 : 24,
-              color: enabled ? widget.color : AppColors.inkMuted,
+              color: enabled ? widget.color : context.palette.inkMuted,
             ),
           ),
         ),

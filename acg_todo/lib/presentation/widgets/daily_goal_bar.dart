@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/domain/services/multi_goal_service.dart';
 import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
@@ -30,14 +31,14 @@ class _DailyGoalBarState extends ConsumerState<DailyGoalBar> {
     final hasMore = rest.isNotEmpty || snap.suggestions.isNotEmpty;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+      padding: EdgeInsets.fromLTRB(16, 2, 16, 6),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        padding: EdgeInsets.fromLTRB(12, 8, 8, 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: AppColors.paperElevated,
+          color: context.palette.elevated,
           border: Border.all(
-            color: (primary.isComplete ? AppColors.success : AppColors.anime)
+            color: (primary.isComplete ? context.palette.success : context.palette.anime)
                 .withValues(alpha: 0.35),
           ),
           boxShadow: AppShadows.soft,
@@ -52,7 +53,7 @@ class _DailyGoalBarState extends ConsumerState<DailyGoalBar> {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
+                    constraints: BoxConstraints(
                       minWidth: 32,
                       minHeight: 32,
                     ),
@@ -60,7 +61,7 @@ class _DailyGoalBarState extends ConsumerState<DailyGoalBar> {
                       _expanded
                           ? Icons.expand_less
                           : Icons.expand_more,
-                      color: AppColors.inkMuted,
+                      color: context.palette.inkMuted,
                     ),
                     onPressed: () => setState(() => _expanded = !_expanded),
                   ),
@@ -76,15 +77,15 @@ class _DailyGoalBarState extends ConsumerState<DailyGoalBar> {
               ),
             ],
             if (_expanded && snap.suggestions.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Wrap(
                 spacing: 6,
                 runSpacing: 4,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     '建議',
-                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    style: TextStyle(fontSize: 12, color: context.palette.inkMuted),
                   ),
                   for (final item in snap.suggestions)
                     ActionChip(
@@ -93,12 +94,12 @@ class _DailyGoalBarState extends ConsumerState<DailyGoalBar> {
                         item.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11),
+                        style: TextStyle(fontSize: 11),
                       ),
-                      backgroundColor: AppColors.getTypeColor(item.type)
+                      backgroundColor: context.palette.typeColor(item.type)
                           .withValues(alpha: 0.2),
                       side: BorderSide(
-                        color: AppColors.getTypeColor(item.type)
+                        color: context.palette.typeColor(item.type)
                             .withValues(alpha: 0.4),
                       ),
                       onPressed: () => context.push('/item/${item.id}'),
@@ -117,11 +118,11 @@ class _PeriodRow extends StatelessWidget {
   final GoalPeriodProgress period;
   final bool large;
 
-  const _PeriodRow({required this.period, required this.large});
+  _PeriodRow({required this.period, required this.large});
 
   @override
   Widget build(BuildContext context) {
-    final color = period.isComplete ? AppColors.success : AppColors.anime;
+    final color = period.isComplete ? context.palette.success : context.palette.anime;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -146,15 +147,15 @@ class _PeriodRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               '${period.current}/${period.target}',
               style: TextStyle(
                 fontSize: large ? 12 : 11,
                 fontWeight: FontWeight.w600,
                 color: period.isComplete
-                    ? AppColors.success
-                    : AppColors.textSecondary,
+                    ? context.palette.success
+                    : context.palette.inkSecondary,
               ),
             ),
           ],
@@ -162,7 +163,7 @@ class _PeriodRow extends StatelessWidget {
         const SizedBox(height: 4),
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: period.progress),
-          duration: const Duration(milliseconds: 400),
+          duration: Duration(milliseconds: 400),
           curve: Curves.easeOutCubic,
           builder: (context, value, _) {
             return ClipRRect(
@@ -170,7 +171,7 @@ class _PeriodRow extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: value,
                 minHeight: large ? 6 : 4,
-                backgroundColor: AppColors.divider,
+                backgroundColor: context.palette.divider,
                 color: color,
               ),
             );

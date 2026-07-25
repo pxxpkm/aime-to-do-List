@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/utils/score_utils.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
@@ -18,7 +19,7 @@ Future<void> showItemEditorSheet(
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.paperElevated,
+    backgroundColor: context.palette.elevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
@@ -162,10 +163,10 @@ class _ItemEditorBodyState extends ConsumerState<_ItemEditorBody> {
                 setState(() => _status = v);
               },
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               '置頂層級',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: context.palette.inkSecondary),
             ),
             const SizedBox(height: 6),
             SegmentedButton<PinTier>(
@@ -181,30 +182,30 @@ class _ItemEditorBodyState extends ConsumerState<_ItemEditorBody> {
                     .setPinTier(item.id, s.first);
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
               '我的評分${_userScore != null ? '：${formatUserScore(_userScore!)}' : '：未評'}',
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: context.palette.inkSecondary),
             ),
             Slider(
               value: _userScore ?? 7.0,
               min: 0,
               max: 10,
               divisions: 100,
-              activeColor: AppColors.lightNovel,
+              activeColor: context.palette.lightNovel,
               onChanged: (v) => setState(() => _userScore = roundUserScore(v)),
             ),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
                 onPressed: () => setState(() => _userScore = null),
-                child: const Text('清除評分'),
+                child: Text('清除評分'),
               ),
             ),
-            const SizedBox(height: 4),
-            const Text(
+            SizedBox(height: 4),
+            Text(
               '標籤',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: context.palette.inkSecondary),
             ),
             const SizedBox(height: 6),
             TagsEditor(
@@ -213,12 +214,12 @@ class _ItemEditorBodyState extends ConsumerState<_ItemEditorBody> {
               onChanged: (t) => setState(() => _tags = t),
             ),
             if (item.score != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 '站點評分 ★ ${item.score!.toStringAsFixed(1)}（唯讀）',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textMuted,
+                  color: context.palette.inkMuted,
                 ),
               ),
             ],

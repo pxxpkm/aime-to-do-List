@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/domain/entities/folder.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/presentation/widgets/poster_image_widget.dart';
@@ -27,7 +28,7 @@ class FolderTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = folder.colorValue != null
         ? Color(folder.colorValue!)
-        : AppColors.manga;
+        : context.palette.manga;
 
     return Material(
       color: Colors.transparent,
@@ -38,11 +39,11 @@ class FolderTile extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: AppColors.paperElevated,
+            color: context.palette.elevated,
             border: Border.all(
               color: isDropHighlight
-                  ? AppColors.anime
-                  : AppColors.borderSubtle,
+                  ? context.palette.anime
+                  : context.palette.border,
               width: isDropHighlight ? 2 : 1,
             ),
             boxShadow: const [
@@ -73,10 +74,10 @@ class FolderTile extends StatelessWidget {
                         folder.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
-                          color: AppColors.inkPrimary,
+                          color: context.palette.ink,
                         ),
                       ),
                     ),
@@ -84,7 +85,7 @@ class FolderTile extends StatelessWidget {
                       '$count',
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.inkMuted,
+                        color: context.palette.inkMuted,
                       ),
                     ),
                   ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide DateUtils;
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/utils/date_utils.dart';
 
 class DeadlineBadge extends StatelessWidget {
@@ -11,12 +12,13 @@ class DeadlineBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = DateUtils.daysUntil(deadline);
-    final color = _colorForDays(days);
+    final p = context.palette;
+    final color = _colorForDays(days, p);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.paperElevated.withValues(alpha: 0.94),
+        color: p.elevated.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color.withValues(alpha: 0.55)),
         boxShadow: const [
@@ -38,10 +40,10 @@ class DeadlineBadge extends StatelessWidget {
     );
   }
 
-  Color _colorForDays(int days) {
-    if (days < 0) return AppColors.danger;
-    if (days <= 1) return AppColors.warning;
-    if (days <= 3) return AppColors.warning;
-    return AppColors.success;
+  Color _colorForDays(int days, AppPalette p) {
+    if (days < 0) return p.danger;
+    if (days <= 1) return p.warning;
+    if (days <= 3) return p.warning;
+    return p.success;
   }
 }

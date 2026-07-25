@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
@@ -186,11 +187,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: Text('取消'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('刪除', style: TextStyle(color: AppColors.danger)),
+            child: Text('刪除', style: TextStyle(color: context.palette.danger)),
           ),
         ],
       ),
@@ -218,11 +219,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: Text('取消'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('刪除', style: TextStyle(color: AppColors.danger)),
+            child: Text('刪除', style: TextStyle(color: context.palette.danger)),
           ),
         ],
       ),
@@ -347,7 +348,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   void _showItemMenu(Item item) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.paperElevated,
+      backgroundColor: context.palette.elevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -368,7 +369,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 leading: Icon(
                   Icons.local_fire_department,
                   color: item.pinTier == PinTier.watching
-                      ? AppColors.anime
+                      ? context.palette.anime
                       : null,
                 ),
                 title: Text(
@@ -390,7 +391,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 leading: Icon(
                   Icons.star,
                   color: item.pinTier == PinTier.priority
-                      ? AppColors.lightNovel
+                      ? context.palette.lightNovel
                       : null,
                 ),
                 title: Text(
@@ -470,9 +471,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 ),
               ListTile(
                 leading:
-                    const Icon(Icons.delete_outline, color: AppColors.danger),
+                    Icon(Icons.delete_outline, color: context.palette.danger),
                 title:
-                    const Text('刪除', style: TextStyle(color: AppColors.danger)),
+                    Text('刪除', style: TextStyle(color: context.palette.danger)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _confirmDeleteOne(item);
@@ -588,8 +589,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                         '刪除',
                         style: TextStyle(
                           color: _selectedIds.isEmpty
-                              ? AppColors.inkMuted
-                              : AppColors.danger,
+                              ? context.palette.inkMuted
+                              : context.palette.danger,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -609,9 +610,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     ),
                     PopupMenuButton<String>(
                       tooltip: '更多',
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.more_horiz,
-                        color: AppColors.inkSecondary,
+                        color: context.palette.inkSecondary,
                       ),
                       onSelected: (value) {
                         if (value.startsWith('sort:')) {
@@ -707,7 +708,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                               hintText: '搜尋架上作品…',
                               isDense: true,
                               filled: true,
-                              fillColor: AppColors.paperElevated,
+                              fillColor: context.palette.elevated,
                               prefixIcon: const Icon(Icons.search, size: 20),
                               suffixIcon: _hasSearch
                                   ? IconButton(
@@ -734,12 +735,12 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                         height: 36,
                         child: ListView(
                           scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: 16),
                           children: [
                             PaperFilterChip(
                               label: '全部',
                               selected: _typeFilter == null,
-                              accent: AppColors.inkPrimary,
+                              accent: context.palette.ink,
                               onTap: () =>
                                   setState(() => _typeFilter = null),
                             ),
@@ -792,32 +793,32 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                             height: 32,
                             child: ListView(
                               scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                 horizontal: 16,
                               ),
                               children: [
                                 PaperFilterChip(
                                   label: '全部標籤',
                                   selected: _tagFilter == null,
-                                  accent: AppColors.inkPrimary,
+                                  accent: context.palette.ink,
                                   onTap: () =>
                                       setState(() => _tagFilter = null),
                                 ),
-                                const SizedBox(width: 6),
+                                SizedBox(width: 6),
                                 PaperFilterChip(
                                   label: '無標籤',
                                   selected: _tagFilter != null &&
                                       _tagFilter!.isEmpty,
-                                  accent: AppColors.inkMuted,
+                                  accent: context.palette.inkMuted,
                                   onTap: () =>
                                       setState(() => _tagFilter = ''),
                                 ),
                                 for (final t in allTags) ...[
-                                  const SizedBox(width: 6),
+                                  SizedBox(width: 6),
                                   PaperFilterChip(
                                     label: t,
                                     selected: _tagFilter == t,
-                                    accent: AppColors.lightNovel,
+                                    accent: context.palette.lightNovel,
                                     onTap: () => setState(
                                       () => _tagFilter =
                                           _tagFilter == t ? null : t,
@@ -849,11 +850,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     if (_hasSearch)
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                          padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
                           child: Text(
                             '搜尋「${_searchQuery.trim()}」· ${filtered.length} 筆',
                             style: AppTypography.micro.copyWith(
-                              color: AppColors.inkMuted,
+                              color: context.palette.inkMuted,
                             ),
                           ),
                         ),
@@ -879,9 +880,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         ),
         child: FloatingActionButton.extended(
           onPressed: () => context.push('/search'),
-          icon: const Icon(Icons.add),
-          label: const Text('加入架上'),
-          backgroundColor: AppColors.anime,
+          icon: Icon(Icons.add),
+          label: Text('加入架上'),
+          backgroundColor: context.palette.anime,
           foregroundColor: Colors.white,
           elevation: 0,
         ),
@@ -1069,13 +1070,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               height: 26,
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.success
-                    : AppColors.paperElevated.withValues(alpha: 0.94),
+                    ? context.palette.success
+                    : context.palette.elevated.withValues(alpha: 0.94),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: selected
-                      ? AppColors.success
-                      : AppColors.borderSubtle,
+                      ? context.palette.success
+                      : context.palette.border,
                   width: 1.5,
                 ),
                 boxShadow: AppShadows.soft,
@@ -1083,7 +1084,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               child: Icon(
                 selected ? Icons.check : Icons.circle_outlined,
                 size: 16,
-                color: selected ? Colors.white : AppColors.inkMuted,
+                color: selected ? Colors.white : context.palette.inkMuted,
               ),
             ),
           ),
@@ -1109,14 +1110,14 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 300),
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.search_off,
                   size: 56,
-                  color: AppColors.inkMuted,
+                  color: context.palette.inkMuted,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -1151,14 +1152,14 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final isFolderEmpty = _folderFilter != null;
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 300),
+        constraints: BoxConstraints(maxWidth: 300),
         child: Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          margin: EdgeInsets.all(24),
+          padding: EdgeInsets.fromLTRB(24, 28, 24, 24),
           decoration: BoxDecoration(
-            color: AppColors.paperElevated,
+            color: context.palette.elevated,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.borderSubtle),
+            border: Border.all(color: context.palette.border),
             boxShadow: AppShadows.soft,
           ),
           child: Column(
@@ -1169,7 +1170,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     ? Icons.folder_open_outlined
                     : Icons.video_library_outlined,
                 size: 56,
-                color: AppColors.inkMuted,
+                color: context.palette.inkMuted,
               ),
               const SizedBox(height: 16),
               Text(
@@ -1209,12 +1210,12 @@ class _HeaderIcon extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const _HeaderIcon({required this.icon, required this.onTap});
+  _HeaderIcon({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(icon, color: AppColors.textSecondary),
+      icon: Icon(icon, color: context.palette.inkSecondary),
       onPressed: onTap,
     );
   }

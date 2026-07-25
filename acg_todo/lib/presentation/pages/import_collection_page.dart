@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/data/repositories/bangumi/bangumi_collection.dart';
 import 'package:acg_todo/data/repositories/bangumi/mappers.dart';
@@ -88,7 +89,7 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('已匯入 ${newItems.length} 個項目'),
-            backgroundColor: AppColors.success,
+            backgroundColor: context.palette.success,
           ),
         );
         context.pop();
@@ -145,17 +146,17 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
 
             // Category selector
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: DropdownButtonFormField<ItemCategory>(
                 initialValue: _category,
-                dropdownColor: AppColors.paperElevated,
+                dropdownColor: context.palette.elevated,
                 decoration: InputDecoration(
                   labelText: '分類',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   filled: true,
-                  fillColor: AppColors.paperElevated,
+                  fillColor: context.palette.elevated,
                 ),
                 items: ItemCategory.values
                     .map((c) => DropdownMenuItem(
@@ -177,33 +178,33 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
             // Content
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator())
                   : _error != null
                       ? Center(
                           child: Text(_error!,
-                              style: const TextStyle(color: AppColors.danger)),
+                              style: TextStyle(color: context.palette.danger)),
                         )
                       : _collections.isEmpty
-                          ? const Center(
+                          ? Center(
                               child: Text(
                                 '此分類暫無收藏',
-                                style: TextStyle(color: AppColors.inkMuted),
+                                style: TextStyle(color: context.palette.inkMuted),
                               ),
                             )
                           : ListView(
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
+                                  EdgeInsets.symmetric(horizontal: 16),
                               children: [
                                 ..._buildGroup(
-                                    grouped, 2, '在看', AppColors.anime),
+                                    grouped, 2, '在看', context.palette.anime),
                                 ..._buildGroup(
-                                    grouped, 1, '想看', AppColors.lightNovel),
+                                    grouped, 1, '想看', context.palette.lightNovel),
                                 ..._buildGroup(
-                                    grouped, 3, '看過', AppColors.success),
+                                    grouped, 3, '看過', context.palette.success),
                                 ..._buildGroup(
-                                    grouped, 4, '擱置', AppColors.warning),
+                                    grouped, 4, '擱置', context.palette.warning),
                                 ..._buildGroup(
-                                    grouped, 5, '拋棄', AppColors.danger),
+                                    grouped, 5, '拋棄', context.palette.danger),
                                 const SizedBox(height: 80),
                               ],
                             ),
@@ -216,11 +217,11 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
       bottomNavigationBar: _selected.isNotEmpty
           ? SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 child: ElevatedButton(
                   onPressed: _importing ? null : _importSelected,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.anime,
+                    backgroundColor: context.palette.anime,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -287,12 +288,12 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
         .any((i) => i.id == 'bgm_${c.subjectId}');
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: AppColors.paperElevated,
+        color: context.palette.elevated,
         borderRadius: BorderRadius.circular(10),
         border: isSelected
-            ? Border.all(color: AppColors.anime, width: 1)
+            ? Border.all(color: context.palette.anime, width: 1)
             : null,
       ),
       child: CheckboxListTile(
@@ -312,12 +313,12 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
           c.displayName,
           style: TextStyle(
             fontSize: 14,
-            color: alreadyExists ? AppColors.textMuted : Colors.white,
+            color: alreadyExists ? context.palette.inkMuted : Colors.white,
           ),
         ),
         subtitle: Text(
           alreadyExists ? '已存在' : (c.eps != null ? '${c.eps} 集' : ''),
-          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          style: TextStyle(fontSize: 11, color: context.palette.inkMuted),
         ),
         secondary: c.posterUrl != null
             ? ClipRRect(
@@ -333,7 +334,7 @@ class _ImportCollectionPageState extends ConsumerState<ImportCollectionPage> {
               )
             : null,
         controlAffinity: ListTileControlAffinity.trailing,
-        activeColor: AppColors.anime,
+        activeColor: context.palette.anime,
         checkColor: Colors.white,
       ),
     );

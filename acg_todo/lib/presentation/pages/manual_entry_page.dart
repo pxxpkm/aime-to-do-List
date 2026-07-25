@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/domain/entities/item.dart';
@@ -134,15 +135,15 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                     const SizedBox(height: 24),
 
                     // Title
-                    const Text('標題 *',
+                    Text('標題 *',
                         style: TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     TextField(
                       controller: _titleController,
                       decoration: InputDecoration(
                         hintText: '作品名稱',
                         filled: true,
-                        fillColor: AppColors.paperElevated,
+                        fillColor: context.palette.elevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -153,15 +154,15 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                     const SizedBox(height: 24),
 
                     // Poster URL
-                    const Text('海報圖片網址（選填）',
+                    Text('海報圖片網址（選填）',
                         style: TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     TextField(
                       controller: _posterUrlController,
                       decoration: InputDecoration(
                         hintText: 'https://...',
                         filled: true,
-                        fillColor: AppColors.paperElevated,
+                        fillColor: context.palette.elevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -174,14 +175,14 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                     // Total units
                     Text('總共${_category.unitLabel == '%' ? '（百分比）' : '有幾'}${_category.unitLabel}（選填）',
                         style: TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     TextField(
                       controller: _totalController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: '例如：12',
                         filled: true,
-                        fillColor: AppColors.paperElevated,
+                        fillColor: context.palette.elevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -192,21 +193,21 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                     const SizedBox(height: 24),
 
                     // Deadline
-                    const Text('限期（選填）',
+                    Text('限期（選填）',
                         style: TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     GestureDetector(
                       onTap: _pickDeadline,
                       child: Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.paperElevated,
+                          color: context.palette.elevated,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.calendar_today_outlined, size: 18),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             Text(
                               _deadline != null
                                   ? '${_deadline!.year}/${_deadline!.month}/${_deadline!.day}'
@@ -214,7 +215,7 @@ class _ManualEntryPageState extends ConsumerState<ManualEntryPage> {
                               style: TextStyle(
                                 color: _deadline != null
                                     ? Colors.white
-                                    : AppColors.inkMuted,
+                                    : context.palette.inkMuted,
                               ),
                             ),
                           ],

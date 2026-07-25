@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/domain/entities/item.dart';
@@ -71,10 +72,10 @@ class ContinueStrip extends ConsumerWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+          padding: EdgeInsets.fromLTRB(20, 4, 20, 0),
           child: Text(
             hasPinnedFill ? '最近進度 · 含釘選' : '依最近進度排序',
-            style: AppTypography.micro.copyWith(color: AppColors.inkMuted),
+            style: AppTypography.micro.copyWith(color: context.palette.inkMuted),
           ),
         ),
       ],

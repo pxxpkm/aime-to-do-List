@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/domain/entities/item.dart';
@@ -44,21 +45,21 @@ class DashboardPage extends ConsumerWidget {
                   // 2. Single "接下來" stream (continue + pins)
                   if (nextUp.isNotEmpty) ...[
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 12, 6),
+                      padding: EdgeInsets.fromLTRB(20, 12, 12, 6),
                       child: Row(
                         children: [
                           Text(
                             '接下來',
                             style: AppTypography.title.copyWith(
                               fontSize: 17,
-                              color: AppColors.inkPrimary,
+                              color: context.palette.ink,
                             ),
                           ),
-                          const Spacer(),
+                          Spacer(),
                           TextButton(
                             onPressed: () => context.go('/library'),
                             style: TextButton.styleFrom(
-                              foregroundColor: AppColors.inkSecondary,
+                              foregroundColor: context.palette.inkSecondary,
                               visualDensity: VisualDensity.compact,
                             ),
                             child: const Text('媒體庫'),
@@ -87,7 +88,7 @@ class DashboardPage extends ConsumerWidget {
                                 avatar: Icon(
                                   Icons.star,
                                   size: 16,
-                                  color: AppColors.lightNovel,
+                                  color: context.palette.lightNovel,
                                 ),
                                 label: Text(
                                   '優先 ${_countTier(items, PinTier.priority)}',
@@ -129,7 +130,7 @@ class DashboardPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/search'),
-        backgroundColor: AppColors.anime,
+        backgroundColor: context.palette.anime,
         foregroundColor: Colors.white,
         tooltip: '加入作品',
         child: const Icon(Icons.add),

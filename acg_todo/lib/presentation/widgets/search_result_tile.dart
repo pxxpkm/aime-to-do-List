@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/presentation/widgets/poster_image_widget.dart';
@@ -28,9 +29,9 @@ class SearchResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.paperElevated,
+        color: context.palette.elevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.palette.border),
         boxShadow: AppShadows.soft,
       ),
       child: Padding(
@@ -63,35 +64,35 @@ class SearchResultTile extends StatelessWidget {
                     style: AppTypography.cardTitle.copyWith(fontSize: 15),
                   ),
                   if (metaLine.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       metaLine,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.caption.copyWith(
-                        color: AppColors.inkMuted,
+                        color: context.palette.inkMuted,
                       ),
                     ),
                   ],
                 ],
               ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: 4),
             if (inList)
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.14),
+                  color: context.palette.success.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: AppColors.success.withValues(alpha: 0.45),
+                    color: context.palette.success.withValues(alpha: 0.45),
                   ),
                 ),
                 child: Text(
                   '在架上',
                   style: AppTypography.micro.copyWith(
-                    color: AppColors.success,
+                    color: context.palette.success,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -99,8 +100,8 @@ class SearchResultTile extends StatelessWidget {
             else
               IconButton(
                 onPressed: onAdd,
-                icon: const Icon(Icons.add_circle_outline),
-                color: AppColors.anime,
+                icon: Icon(Icons.add_circle_outline),
+                color: context.palette.anime,
                 iconSize: 28,
                 tooltip: '新增',
               ),
@@ -132,19 +133,19 @@ class SearchEmptyPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-        constraints: const BoxConstraints(maxWidth: 320),
+        margin: EdgeInsets.all(24),
+        padding: EdgeInsets.fromLTRB(24, 28, 24, 24),
+        constraints: BoxConstraints(maxWidth: 320),
         decoration: BoxDecoration(
-          color: AppColors.paperElevated,
+          color: context.palette.elevated,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.borderSubtle),
+          border: Border.all(color: context.palette.border),
           boxShadow: AppShadows.soft,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: AppColors.inkMuted),
+            Icon(icon, size: 48, color: context.palette.inkMuted),
             const SizedBox(height: 16),
             Text(
               title,

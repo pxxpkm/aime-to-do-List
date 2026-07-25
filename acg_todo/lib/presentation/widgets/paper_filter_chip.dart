@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 
 /// Paper-gallery filter pill — selected uses ink/accent text, never white-on-wash.
 class PaperFilterChip extends StatelessWidget {
@@ -29,11 +30,11 @@ class PaperFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = selected
         ? accent.withValues(alpha: 0.14)
-        : AppColors.paperElevated;
+        : context.palette.elevated;
     final border = selected
         ? accent.withValues(alpha: 0.55)
-        : AppColors.borderSubtle;
-    final fg = selected ? accent : AppColors.inkSecondary;
+        : context.palette.border;
+    final fg = selected ? accent : context.palette.inkSecondary;
 
     return Material(
       color: Colors.transparent,
@@ -75,7 +76,7 @@ class PaperFilterChip extends StatelessWidget {
                 ),
               ),
               if (countLabel != null) ...[
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(
                   countLabel!,
                   style: TextStyle(
@@ -83,7 +84,7 @@ class PaperFilterChip extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: selected
                         ? accent.withValues(alpha: 0.85)
-                        : AppColors.inkMuted,
+                        : context.palette.inkMuted,
                   ),
                 ),
               ],

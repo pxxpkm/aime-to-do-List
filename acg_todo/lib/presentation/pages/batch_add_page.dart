@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/core/utils/zh_convert.dart';
@@ -208,7 +209,7 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
                       decoration: InputDecoration(
                         hintText: '每行一個標題，最多 30 行\n例如：\n無職轉生\n藥屋少女的呢喃\n…',
                         filled: true,
-                        fillColor: AppColors.paperElevated,
+                        fillColor: context.palette.elevated,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -218,11 +219,11 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   child: ElevatedButton(
                     onPressed: _searching ? null : _preview,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.anime,
+                      backgroundColor: context.palette.anime,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
@@ -231,15 +232,15 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
                 ),
               ] else ...[
                 if (_searching)
-                  const LinearProgressIndicator(minHeight: 2),
+                  LinearProgressIndicator(minHeight: 2),
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
                     itemCount: rows.length,
                     itemBuilder: (_, i) {
                       final row = rows[i];
                       return Card(
-                        color: AppColors.paperElevated,
+                        color: context.palette.elevated,
                         child: CheckboxListTile(
                           value: row.checked,
                           onChanged: row.selected == null || row.loading
@@ -248,11 +249,11 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
                                   setState(() => row.checked = v ?? false),
                           title: Text(row.query, maxLines: 1),
                           subtitle: row.loading
-                              ? const Text('搜尋中…')
+                              ? Text('搜尋中…')
                               : row.error != null && row.selected == null
                                   ? Text(row.error!,
-                                      style: const TextStyle(
-                                          color: AppColors.danger))
+                                      style: TextStyle(
+                                          color: context.palette.danger))
                                   : Text(
                                       row.selected?.displayName ?? '',
                                       maxLines: 2,
@@ -283,15 +284,15 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
                           onPressed: _adding
                               ? null
                               : () => setState(() => _rows = null),
-                          child: const Text('返回編輯'),
+                          child: Text('返回編輯'),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _adding || _searching ? null : _confirmAdd,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.anime,
+                            backgroundColor: context.palette.anime,
                             foregroundColor: Colors.white,
                           ),
                           child: Text(

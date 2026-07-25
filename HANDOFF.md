@@ -1,6 +1,6 @@
 ﻿# HANDOFF.md — ACG To-Do（給下一個零上下文會話）
 
-> **最後更新**：2026-07-26（Deploy A+B：Cloudflare Pages + /proxy Function）  
+> **最後更新**：2026-07-26（主題系統 T1：AppPalette + 預設 paper_light + 可選 dark）  
 > **專案路徑**：`C:\todo\acg_todo\` · **Git root**：`C:\todo`  
 > **Flutter**：3.x · Dart 3.x · 以 **Flutter Web** 為主  
 > **文件優先**：本 HANDOFF + `lib/` 真相；`AGENTS.md` 有過時（舊 dark/Supabase 全量）部分
@@ -138,9 +138,15 @@
 ### 2.6c Hero 預載
 - 切換主頁海報時 `precacheImage` 左右鄰（Web 走 `toProxyUrl`）  
 
-### 2.7 UI 主題
-- Paper light：`app_colors.dart`, `app_theme.dart`, `app_typography.dart`（Noto TC，字重已加粗）  
-- **預設 dark 已廢棄**（`AppTheme.dark => light`）  
+### 2.7 UI 主題（多主題管線，安全預設 light）
+- **預設 `paper_light`**（色值凍結 = 舊 paper；不跟系統變，免嚇到現有用戶）  
+- **可選 `paper_dark`**（暖暗畫廊）+ **跟隨系統**（只在 light/dark 紙感間切）  
+- `AppPalette` ThemeExtension + `resolvePalette` + `AppTheme.fromPalette`  
+- 設定 → 外觀；settings.ui：`theme_id` / `theme_follow_system`  
+- **T2**：presentation 頁/元件改 `context.palette.*`（dark 可切全站殼與卡片）  
+- 靜態 `AppColors` 仍保留 light 凍結值（相容/測試）；新碼優先 palette  
+- **on-image** 海報白字/黑漸層不跟主題改  
+- 加新色：只加 `AppPalette` 常量並註冊 `registry`  
 
 ---
 

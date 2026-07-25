@@ -1,143 +1,185 @@
 import 'package:flutter/material.dart';
 
-import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 
 class AppTheme {
-  static ThemeData get light {
+  /// Build Material theme from a palette (multi-theme ready).
+  static ThemeData fromPalette(AppPalette p) {
+    final isDark = p.brightness == Brightness.dark;
     final base = ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: AppColors.paperBg,
+      brightness: p.brightness,
+      scaffoldBackgroundColor: p.bg,
       fontFamily: AppTypography.sansFamily,
     );
 
+    final colorScheme = isDark
+        ? ColorScheme.dark(
+            primary: p.anime,
+            secondary: p.manga,
+            surface: p.surface,
+            error: p.danger,
+            onPrimary: Colors.white,
+            onSecondary: Colors.white,
+            onSurface: p.ink,
+            onError: Colors.white,
+            outline: p.border,
+          )
+        : ColorScheme.light(
+            primary: p.anime,
+            secondary: p.manga,
+            surface: p.surface,
+            error: p.danger,
+            onPrimary: Colors.white,
+            onSecondary: Colors.white,
+            onSurface: p.ink,
+            onError: Colors.white,
+            outline: p.border,
+          );
+
+    TextStyle withInk(TextStyle s, Color c) => s.copyWith(color: c);
+
     return base.copyWith(
-      colorScheme: ColorScheme.light(
-        primary: AppColors.anime,
-        secondary: AppColors.manga,
-        surface: AppColors.paperSurface,
-        error: AppColors.danger,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: AppColors.inkPrimary,
-        onError: Colors.white,
-        outline: AppColors.borderSubtle,
-      ),
+      extensions: <ThemeExtension<dynamic>>[p],
+      colorScheme: colorScheme,
       textTheme: TextTheme(
-        displayLarge: AppTypography.display,
-        displayMedium: AppTypography.display,
-        displaySmall: AppTypography.title,
-        headlineLarge: AppTypography.display,
-        headlineMedium: AppTypography.title,
-        headlineSmall: AppTypography.title,
-        titleLarge: AppTypography.title,
-        titleMedium: AppTypography.body.copyWith(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
+        displayLarge: withInk(AppTypography.display, p.ink),
+        displayMedium: withInk(AppTypography.display, p.ink),
+        displaySmall: withInk(AppTypography.title, p.ink),
+        headlineLarge: withInk(AppTypography.display, p.ink),
+        headlineMedium: withInk(AppTypography.title, p.ink),
+        headlineSmall: withInk(AppTypography.title, p.ink),
+        titleLarge: withInk(AppTypography.title, p.ink),
+        titleMedium: withInk(
+          AppTypography.body.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+          p.ink,
         ),
-        titleSmall: AppTypography.body.copyWith(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
+        titleSmall: withInk(
+          AppTypography.body.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+          p.ink,
         ),
-        bodyLarge: AppTypography.body,
-        bodyMedium: AppTypography.body,
-        bodySmall: AppTypography.caption,
-        labelLarge: AppTypography.body.copyWith(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
+        bodyLarge: withInk(AppTypography.body, p.ink),
+        bodyMedium: withInk(AppTypography.body, p.ink),
+        bodySmall: withInk(AppTypography.caption, p.inkSecondary),
+        labelLarge: withInk(
+          AppTypography.body.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+          p.ink,
         ),
-        labelMedium: AppTypography.caption,
-        labelSmall: AppTypography.micro,
+        labelMedium: withInk(AppTypography.caption, p.inkSecondary),
+        labelSmall: withInk(AppTypography.micro, p.inkMuted),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.paperSurface,
-        foregroundColor: AppColors.inkPrimary,
+        backgroundColor: p.surface,
+        foregroundColor: p.ink,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         centerTitle: false,
-        titleTextStyle: AppTypography.title,
-        iconTheme: const IconThemeData(color: AppColors.inkSecondary),
+        titleTextStyle: withInk(AppTypography.title, p.ink),
+        iconTheme: IconThemeData(color: p.inkSecondary),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.paperElevated,
+        color: p.elevated,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.borderSubtle),
+          side: BorderSide(color: p.border),
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.paperSurface,
-        selectedColor: AppColors.anime.withValues(alpha: 0.15),
-        disabledColor: AppColors.divider,
-        labelStyle: AppTypography.caption.copyWith(color: AppColors.inkPrimary),
-        secondaryLabelStyle:
-            AppTypography.caption.copyWith(color: AppColors.inkPrimary),
-        side: const BorderSide(color: AppColors.borderSubtle),
+        backgroundColor: p.surface,
+        selectedColor: p.anime.withValues(alpha: 0.15),
+        disabledColor: p.divider,
+        labelStyle: withInk(AppTypography.caption, p.ink),
+        secondaryLabelStyle: withInk(AppTypography.caption, p.ink),
+        side: BorderSide(color: p.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.anime,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: p.anime,
         foregroundColor: Colors.white,
         elevation: 4,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.inkPrimary,
-        contentTextStyle: AppTypography.body.copyWith(color: Colors.white),
+        backgroundColor: isDark ? p.elevated : p.ink,
+        contentTextStyle: withInk(
+          AppTypography.body,
+          isDark ? p.ink : Colors.white,
+        ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.paperElevated,
+        backgroundColor: p.elevated,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        titleTextStyle: AppTypography.title,
-        contentTextStyle: AppTypography.body,
+        titleTextStyle: withInk(AppTypography.title, p.ink),
+        contentTextStyle: withInk(AppTypography.body, p.ink),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.paperElevated,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: p.elevated,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.divider,
+      dividerTheme: DividerThemeData(
+        color: p.divider,
         thickness: 1,
         space: 1,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.paperElevated,
-        hintStyle: AppTypography.body.copyWith(color: AppColors.inkMuted),
-        labelStyle: AppTypography.caption,
+        fillColor: p.elevated,
+        hintStyle: withInk(AppTypography.body, p.inkMuted),
+        labelStyle: withInk(AppTypography.caption, p.inkSecondary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.borderSubtle),
+          borderSide: BorderSide(color: p.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.borderSubtle),
+          borderSide: BorderSide(color: p.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.anime, width: 1.5),
+          borderSide: BorderSide(color: p.anime, width: 1.5),
         ),
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.anime,
-        linearTrackColor: AppColors.divider,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: p.anime,
+        linearTrackColor: p.divider,
       ),
-      listTileTheme: const ListTileThemeData(
-        iconColor: AppColors.inkSecondary,
-        textColor: AppColors.inkPrimary,
+      listTileTheme: ListTileThemeData(
+        iconColor: p.inkSecondary,
+        textColor: p.ink,
       ),
-      iconTheme: const IconThemeData(color: AppColors.inkSecondary),
+      iconTheme: IconThemeData(color: p.inkSecondary),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: p.surface,
+        selectedIconTheme: IconThemeData(color: p.anime),
+        unselectedIconTheme: IconThemeData(color: p.inkSecondary),
+        selectedLabelTextStyle: withInk(AppTypography.caption, p.anime),
+        unselectedLabelTextStyle:
+            withInk(AppTypography.caption, p.inkSecondary),
+      ),
+      drawerTheme: DrawerThemeData(backgroundColor: p.surface),
     );
   }
 
-  /// Legacy alias — paper light is the only v1 theme.
-  static ThemeData get dark => light;
+  /// Default / frozen paper light (same pixels as historical AppTheme.light).
+  static ThemeData get light => fromPalette(AppPalette.paperLight);
+
+  /// Warm dark gallery theme.
+  static ThemeData get dark => fromPalette(AppPalette.paperDark);
 }

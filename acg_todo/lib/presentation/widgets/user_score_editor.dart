@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/utils/score_utils.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
@@ -16,7 +17,7 @@ Future<void> showUserScoreEditor(
 
   await showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AppColors.paperElevated,
+    backgroundColor: context.palette.elevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
@@ -33,15 +34,15 @@ Future<void> showUserScoreEditor(
                     '我的評分',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     hasScore ? formatUserScore(value) : '未評分',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: hasScore
-                          ? AppColors.lightNovel
-                          : AppColors.textMuted,
+                          ? context.palette.lightNovel
+                          : context.palette.inkMuted,
                     ),
                   ),
                   Slider(
@@ -50,7 +51,7 @@ Future<void> showUserScoreEditor(
                     max: 10,
                     divisions: 100,
                     label: formatUserScore(value),
-                    activeColor: AppColors.lightNovel,
+                    activeColor: context.palette.lightNovel,
                     onChanged: (v) => setLocal(() {
                       hasScore = true;
                       value = roundUserScore(v) ?? v;

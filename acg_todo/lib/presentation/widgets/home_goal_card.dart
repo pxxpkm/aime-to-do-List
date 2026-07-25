@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/domain/services/multi_goal_service.dart';
 import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
@@ -16,11 +17,11 @@ class HomeGoalPill extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final snap = ref.watch(multiGoalProvider);
     final visible = snap.visible;
-    if (visible.isEmpty) return const SizedBox.shrink();
+    if (visible.isEmpty) return SizedBox.shrink();
 
     final primary = visible.first;
     final color =
-        primary.isComplete ? AppColors.success : AppColors.anime;
+        primary.isComplete ? context.palette.success : context.palette.anime;
     final pct = (primary.progress * 100).round().clamp(0, 100);
 
     return Material(
@@ -83,7 +84,7 @@ Future<void> showHomeGoalSheet(BuildContext context) {
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: AppColors.paperElevated,
+    backgroundColor: context.palette.elevated,
     builder: (ctx) {
       final maxH = MediaQuery.sizeOf(ctx).height * 0.72;
       return SafeArea(
@@ -114,11 +115,11 @@ class HomeGoalSheetBody extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: Text('取消'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            style: TextButton.styleFrom(foregroundColor: context.palette.danger),
             child: const Text('重設'),
           ),
         ],
@@ -153,7 +154,7 @@ class HomeGoalSheetBody extends ConsumerWidget {
     final rest =
         visible.length > 1 ? visible.sublist(1) : <GoalPeriodProgress>[];
     final color =
-        primary.isComplete ? AppColors.success : AppColors.anime;
+        primary.isComplete ? context.palette.success : context.palette.anime;
     final pct = (primary.progress * 100).round();
 
     return Column(
@@ -169,7 +170,7 @@ class HomeGoalSheetBody extends ConsumerWidget {
                   Text(
                     '今日進度',
                     style: AppTypography.micro.copyWith(
-                      color: AppColors.inkMuted,
+                      color: context.palette.inkMuted,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -190,7 +191,7 @@ class HomeGoalSheetBody extends ConsumerWidget {
                         ' / ${primary.target}',
                         style: AppTypography.title.copyWith(
                           fontSize: 16,
-                          color: AppColors.inkSecondary,
+                          color: context.palette.inkSecondary,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -209,46 +210,46 @@ class HomeGoalSheetBody extends ConsumerWidget {
             TextButton.icon(
               onPressed:
                   primary.current > 0 ? () => _resetToday(context, ref) : null,
-              icon: const Icon(Icons.restart_alt_rounded, size: 18),
-              label: const Text('重設今日'),
+              icon: Icon(Icons.restart_alt_rounded, size: 18),
+              label: Text('重設今日'),
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.inkSecondary,
+                foregroundColor: context.palette.inkSecondary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         ClipRRect(
           borderRadius: BorderRadius.circular(99),
           child: LinearProgressIndicator(
             value: primary.progress.clamp(0.0, 1.0),
             minHeight: 8,
-            backgroundColor: AppColors.divider,
+            backgroundColor: context.palette.divider,
             color: color,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           primary.isComplete
               ? '今日目標已完成'
               : '還差 ${primary.remaining}',
-          style: AppTypography.micro.copyWith(color: AppColors.inkMuted),
+          style: AppTypography.micro.copyWith(color: context.palette.inkMuted),
         ),
         if (rest.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const Divider(height: 1, color: AppColors.divider),
+          SizedBox(height: 16),
+          Divider(height: 1, color: context.palette.divider),
           const SizedBox(height: 12),
           for (final p in rest) ...[
             _MiniPeriodRow(period: p),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
           ],
         ],
         if (snap.suggestions.isNotEmpty) ...[
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             '建議接著看',
             style: AppTypography.micro.copyWith(
-              color: AppColors.inkMuted,
+              color: context.palette.inkMuted,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -264,12 +265,12 @@ class HomeGoalSheetBody extends ConsumerWidget {
                     item.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 12),
                   ),
                   backgroundColor:
-                      AppColors.getTypeColor(item.type).withValues(alpha: 0.12),
+                      context.palette.typeColor(item.type).withValues(alpha: 0.12),
                   side: BorderSide(
-                    color: AppColors.getTypeColor(item.type)
+                    color: context.palette.typeColor(item.type)
                         .withValues(alpha: 0.35),
                   ),
                   onPressed: () {
@@ -292,12 +293,12 @@ class HomeGoalCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final snap = ref.watch(multiGoalProvider);
-    if (snap.visible.isEmpty) return const SizedBox.shrink();
+    if (snap.visible.isEmpty) return SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 0, 18, 4),
+      padding: EdgeInsets.fromLTRB(18, 0, 18, 4),
       child: Material(
-        color: AppColors.paperElevated,
+        color: context.palette.elevated,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () => showHomeGoalSheet(context),
@@ -315,12 +316,12 @@ class HomeGoalCard extends ConsumerWidget {
 class _MiniPeriodRow extends StatelessWidget {
   final GoalPeriodProgress period;
 
-  const _MiniPeriodRow({required this.period});
+  _MiniPeriodRow({required this.period});
 
   @override
   Widget build(BuildContext context) {
     final color =
-        period.isComplete ? AppColors.success : AppColors.inkSecondary;
+        period.isComplete ? context.palette.success : context.palette.inkSecondary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -330,7 +331,7 @@ class _MiniPeriodRow extends StatelessWidget {
               child: Text(
                 period.label,
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.inkPrimary,
+                  color: context.palette.ink,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -344,13 +345,13 @@ class _MiniPeriodRow extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         ClipRRect(
           borderRadius: BorderRadius.circular(99),
           child: LinearProgressIndicator(
             value: period.progress.clamp(0.0, 1.0),
             minHeight: 4,
-            backgroundColor: AppColors.divider,
+            backgroundColor: context.palette.divider,
             color: color,
           ),
         ),

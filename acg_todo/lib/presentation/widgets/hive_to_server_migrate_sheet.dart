@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/data/local/goal_settings_store.dart';
 import 'package:acg_todo/data/local/hive_cache.dart';
@@ -16,7 +17,7 @@ Future<void> showHiveToServerMigrateSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.paperElevated,
+    backgroundColor: context.palette.elevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -114,11 +115,11 @@ class _HiveToServerMigrateSheetState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('取消'),
+              child: Text('取消'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+              style: TextButton.styleFrom(foregroundColor: context.palette.danger),
               child: const Text('確定取代'),
             ),
           ],
@@ -195,7 +196,7 @@ class _HiveToServerMigrateSheetState
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.divider,
+                  color: context.palette.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -207,13 +208,13 @@ class _HiveToServerMigrateSheetState
               '把 IndexedDB（Hive）裡的作品合併進 library.db。',
               style: AppTypography.caption,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.paperSurface,
+                color: context.palette.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.borderSubtle),
+                border: Border.all(color: context.palette.border),
               ),
               child: Text(
                 '瀏覽器：作品 ${_hiveCounts?.itemCount ?? '…'} · '
@@ -259,7 +260,7 @@ class _HiveToServerMigrateSheetState
               title: Text(
                 '一併合併每日進度',
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.inkPrimary,
+                  color: context.palette.ink,
                 ),
               ),
               controlAffinity: ListTileControlAffinity.leading,
@@ -278,7 +279,7 @@ class _HiveToServerMigrateSheetState
                 title: Text(
                   '覆寫目標 / 外觀設定（用瀏覽器那份）',
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.inkPrimary,
+                    color: context.palette.ink,
                   ),
                 ),
                 controlAffinity: ListTileControlAffinity.leading,
@@ -295,10 +296,10 @@ class _HiveToServerMigrateSheetState
               ),
             ],
             if (_error != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 _error!,
-                style: AppTypography.caption.copyWith(color: AppColors.danger),
+                style: AppTypography.caption.copyWith(color: context.palette.danger),
               ),
             ],
             const SizedBox(height: 16),

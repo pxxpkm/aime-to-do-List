@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 
 /// Shell destinations (index must match StatefulShellBranch order).
@@ -70,7 +71,7 @@ class AppShell extends StatelessWidget {
         .label;
 
     return Scaffold(
-      backgroundColor: AppColors.paperBg,
+      backgroundColor: context.palette.bg,
       drawer: wide
           ? null
           : _ShellDrawer(
@@ -93,7 +94,7 @@ class AppShell extends StatelessWidget {
               children: [
                 if (!wide)
                   Material(
-                    color: AppColors.paperElevated,
+                    color: context.palette.elevated,
                     child: SafeArea(
                       bottom: false,
                       child: SizedBox(
@@ -102,8 +103,8 @@ class AppShell extends StatelessWidget {
                           children: [
                             Builder(
                               builder: (ctx) => IconButton(
-                                icon: const Icon(Icons.menu),
-                                color: AppColors.inkSecondary,
+                                icon: Icon(Icons.menu),
+                                color: context.palette.inkSecondary,
                                 onPressed: () =>
                                     Scaffold.of(ctx).openDrawer(),
                               ),
@@ -122,7 +123,7 @@ class AppShell extends StatelessWidget {
                     ),
                   ),
                 if (!wide)
-                  const Divider(height: 1, color: AppColors.borderSubtle),
+                  Divider(height: 1, color: context.palette.border),
                 Expanded(child: navigationShell),
               ],
             ),
@@ -146,7 +147,7 @@ class _ShellRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final extended = MediaQuery.sizeOf(context).width >= 1100;
     return Material(
-      color: AppColors.paperElevated,
+      color: context.palette.elevated,
       child: SafeArea(
         right: false,
         child: Row(
@@ -155,25 +156,25 @@ class _ShellRail extends StatelessWidget {
             NavigationRail(
               extended: extended,
               minExtendedWidth: 168,
-              backgroundColor: AppColors.paperElevated,
-              indicatorColor: AppColors.anime.withValues(alpha: 0.14),
+              backgroundColor: context.palette.elevated,
+              indicatorColor: context.palette.anime.withValues(alpha: 0.14),
               selectedIndex: selectedIndex,
               onDestinationSelected: onSelect,
               labelType: extended
                   ? NavigationRailLabelType.none
                   : NavigationRailLabelType.all,
-              selectedIconTheme: const IconThemeData(
-                color: AppColors.anime,
+              selectedIconTheme: IconThemeData(
+                color: context.palette.anime,
               ),
-              unselectedIconTheme: const IconThemeData(
-                color: AppColors.inkSecondary,
+              unselectedIconTheme: IconThemeData(
+                color: context.palette.inkSecondary,
               ),
               selectedLabelTextStyle: AppTypography.caption.copyWith(
-                color: AppColors.inkPrimary,
+                color: context.palette.ink,
                 fontWeight: FontWeight.w700,
               ),
               unselectedLabelTextStyle: AppTypography.caption.copyWith(
-                color: AppColors.inkSecondary,
+                color: context.palette.inkSecondary,
               ),
               destinations: [
                 for (final d in kShellDestinations)
@@ -184,10 +185,10 @@ class _ShellRail extends StatelessWidget {
                   ),
               ],
             ),
-            const VerticalDivider(
+            VerticalDivider(
               width: 1,
               thickness: 1,
-              color: AppColors.borderSubtle,
+              color: context.palette.border,
             ),
           ],
         ),
@@ -200,7 +201,7 @@ class _ShellDrawer extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelect;
 
-  const _ShellDrawer({
+  _ShellDrawer({
     required this.selectedIndex,
     required this.onSelect,
   });
@@ -208,20 +209,20 @@ class _ShellDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: AppColors.paperElevated,
+      backgroundColor: context.palette.elevated,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 12),
               child: Text(
                 'ACG To-Do',
                 style: AppTypography.title.copyWith(fontSize: 18),
               ),
             ),
-            const Divider(height: 1, color: AppColors.borderSubtle),
-            const SizedBox(height: 8),
+            Divider(height: 1, color: context.palette.border),
+            SizedBox(height: 8),
             for (var i = 0; i < kShellDestinations.length; i++)
               ListTile(
                 leading: Icon(
@@ -229,8 +230,8 @@ class _ShellDrawer extends StatelessWidget {
                       ? kShellDestinations[i].selectedIcon
                       : kShellDestinations[i].icon,
                   color: selectedIndex == i
-                      ? AppColors.anime
-                      : AppColors.inkSecondary,
+                      ? context.palette.anime
+                      : context.palette.inkSecondary,
                 ),
                 title: Text(
                   kShellDestinations[i].label,
@@ -238,11 +239,11 @@ class _ShellDrawer extends StatelessWidget {
                     fontWeight: selectedIndex == i
                         ? FontWeight.w700
                         : FontWeight.w500,
-                    color: AppColors.inkPrimary,
+                    color: context.palette.ink,
                   ),
                 ),
                 selected: selectedIndex == i,
-                selectedTileColor: AppColors.anime.withValues(alpha: 0.1),
+                selectedTileColor: context.palette.anime.withValues(alpha: 0.1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

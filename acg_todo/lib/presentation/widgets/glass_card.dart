@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 
 /// Paper surface card (legacy name [GlassCard] kept for call sites).
@@ -29,9 +30,9 @@ class GlassCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            color: AppColors.paperElevated,
+            color: context.palette.elevated,
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: AppColors.borderSubtle),
+            border: Border.all(color: context.palette.border),
             boxShadow: AppShadows.soft,
           ),
           child: padding != null

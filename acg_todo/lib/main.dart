@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:acg_todo/core/router/app_router.dart';
 import 'package:acg_todo/core/theme/app_theme.dart';
+import 'package:acg_todo/core/theme/theme_resolve.dart';
 import 'package:acg_todo/core/utils/logger.dart';
 import 'package:acg_todo/data/local/goal_settings_store.dart';
 import 'package:acg_todo/data/local/hive_cache.dart';
@@ -18,6 +19,7 @@ import 'package:acg_todo/data/local/notification_store.dart';
 import 'package:acg_todo/data/local/server_health.dart';
 import 'package:acg_todo/data/local/server_library_store.dart';
 import 'package:acg_todo/data/local/server_notification_store.dart';
+import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
 import 'package:acg_todo/presentation/providers/notification_providers.dart';
 import 'package:acg_todo/presentation/providers/repository_providers.dart';
 
@@ -268,11 +270,24 @@ class _AcgTodoAppState extends ConsumerState<AcgTodoApp>
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
+    // Rebuild when theme prefs change (settings ticks this).
+    ref.watch(dailyGoalTickProvider);
+    final store = ref.watch(goalSettingsStoreProvider);
+    // Root widget may lack MediaQuery; use platform dispatcher.
+    final platform =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final palette = resolvePalette(
+      themeId: store.themeId,
+      followSystem: store.themeFollowSystem,
+      platformBrightness: platform,
+    );
 
+    // Single dynamic theme (multi-color themes won't fit light/dark slots).
+    // Default resolve → paper_light → same pixels as historical AppTheme.light.
     return MaterialApp.router(
       title: 'ACG To-Do',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+      theme: AppTheme.fromPalette(palette),
       routerConfig: router,
     );
   }

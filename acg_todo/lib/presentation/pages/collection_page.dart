@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/domain/entities/folder.dart';
@@ -70,11 +71,11 @@ class CollectionPage extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
                 child: Text(
                   '點資料夾開啟媒體庫；長按可重新命名或刪除。',
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.inkMuted,
+                    color: context.palette.inkMuted,
                   ),
                 ),
               ),
@@ -196,7 +197,7 @@ class CollectionPage extends ConsumerWidget {
 
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: AppColors.paperElevated,
+      backgroundColor: context.palette.elevated,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
         child: Column(
@@ -208,12 +209,12 @@ class CollectionPage extends ConsumerWidget {
               onTap: () => Navigator.pop(ctx, 'open'),
             ),
             ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: const Text('重新命名'),
+              leading: Icon(Icons.edit_outlined),
+              title: Text('重新命名'),
               onTap: () => Navigator.pop(ctx, 'rename'),
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.danger),
+              leading: Icon(Icons.delete_outline, color: context.palette.danger),
               title: const Text('刪除資料夾'),
               subtitle: const Text('作品會回到未分類'),
               onTap: () => Navigator.pop(ctx, 'delete'),
@@ -248,11 +249,11 @@ class CollectionPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('取消'),
+              child: Text('取消'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+              style: TextButton.styleFrom(foregroundColor: context.palette.danger),
               child: const Text('刪除'),
             ),
           ],
@@ -287,8 +288,8 @@ class _UncategorizedTile extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: AppColors.paperElevated,
-            border: Border.all(color: AppColors.borderSubtle),
+            color: context.palette.elevated,
+            border: Border.all(color: context.palette.border),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x1A2C2416),
@@ -302,26 +303,26 @@ class _UncategorizedTile extends StatelessWidget {
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 4),
                   child: previewItems.isEmpty
                       ? Center(
                           child: Icon(
                             Icons.inbox_outlined,
                             size: 36,
-                            color: AppColors.inkMuted.withValues(alpha: 0.55),
+                            color: context.palette.inkMuted.withValues(alpha: 0.55),
                           ),
                         )
                       : _PreviewGrid(items: previewItems),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                padding: EdgeInsets.fromLTRB(12, 4, 12, 12),
                 child: Row(
                   children: [
                     Icon(
                       Icons.folder_off_outlined,
                       size: 16,
-                      color: AppColors.inkSecondary,
+                      color: context.palette.inkSecondary,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -337,7 +338,7 @@ class _UncategorizedTile extends StatelessWidget {
                     Text(
                       '$count',
                       style: AppTypography.micro.copyWith(
-                        color: AppColors.inkMuted,
+                        color: context.palette.inkMuted,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -375,7 +376,7 @@ class _PreviewGrid extends StatelessWidget {
                 fit: BoxFit.cover,
               )
             else
-              ColoredBox(color: AppColors.paperSurface),
+              ColoredBox(color: context.palette.surface),
         ],
       ),
     );
@@ -395,14 +396,14 @@ class _EmptyCollection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.folder_open_outlined,
               size: 48,
-              color: AppColors.inkMuted.withValues(alpha: 0.6),
+              color: context.palette.inkMuted.withValues(alpha: 0.6),
             ),
             const SizedBox(height: 16),
             Text('還沒有資料夾', style: AppTypography.title.copyWith(fontSize: 18)),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/domain/entities/item.dart';
@@ -60,7 +61,7 @@ class HomePriorityBoard extends StatelessWidget {
         final watchingLane = _PinLane(
           tier: PinTier.watching,
           title: '正在追',
-          accent: AppColors.anime,
+          accent: context.palette.anime,
           items: watching,
           cardSize: cardSize,
           onTap: onTap,
@@ -73,7 +74,7 @@ class HomePriorityBoard extends StatelessWidget {
         final priorityLane = _PinLane(
           tier: PinTier.priority,
           title: '優先追',
-          accent: AppColors.lightNovel,
+          accent: context.palette.lightNovel,
           items: priority,
           cardSize: cardSize,
           onTap: onTap,
@@ -163,9 +164,9 @@ class _PinLane extends StatelessWidget {
       height: _laneHeight,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.paperElevated,
+          color: context.palette.elevated,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.borderSubtle),
+          border: Border.all(color: context.palette.border),
           boxShadow: AppShadows.soft,
         ),
         clipBehavior: Clip.antiAlias,
@@ -198,11 +199,11 @@ class _PinLane extends StatelessWidget {
                                   fontSize: 13,
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6),
                               Text(
                                 '${items.length}',
                                 style: AppTypography.caption.copyWith(
-                                  color: AppColors.inkSecondary,
+                                  color: context.palette.inkSecondary,
                                 ),
                               ),
                               if (items.isNotEmpty && onTitleTap != null) ...[
@@ -214,11 +215,11 @@ class _PinLane extends StatelessWidget {
                                 ),
                               ],
                               if (reorder && items.length > 1) ...[
-                                const Spacer(),
+                                Spacer(),
                                 Text(
                                   '右側拖排序',
                                   style: AppTypography.micro.copyWith(
-                                    color: AppColors.inkMuted,
+                                    color: context.palette.inkMuted,
                                   ),
                                 ),
                               ],
@@ -227,7 +228,7 @@ class _PinLane extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: _titleGap),
+                    SizedBox(height: _titleGap),
                     if (items.isEmpty)
                       Expanded(
                         child: Align(
@@ -235,7 +236,7 @@ class _PinLane extends StatelessWidget {
                           child: Text(
                             '⋮ 釘選到$title',
                             style: AppTypography.caption.copyWith(
-                              color: AppColors.inkMuted,
+                              color: context.palette.inkMuted,
                             ),
                           ),
                         ),
@@ -276,6 +277,7 @@ class _PinLane extends StatelessWidget {
                                 itemBuilder: (context, i) {
                                   final item = items[i];
                                   return _reorderableCard(
+                                    context,
                                     item,
                                     index: i,
                                     key: ValueKey(
@@ -325,6 +327,7 @@ class _PinLane extends StatelessWidget {
   }
 
   Widget _reorderableCard(
+    BuildContext context,
     Item item, {
     required int index,
     required Key key,
@@ -358,7 +361,7 @@ class _PinLane extends StatelessWidget {
               child: Icon(
                 Icons.drag_indicator,
                 size: _gripIconSize,
-                color: AppColors.inkMuted,
+                color: context.palette.inkMuted,
               ),
             ),
           ),

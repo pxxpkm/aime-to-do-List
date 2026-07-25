@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_shadows.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 
@@ -23,9 +24,9 @@ class DetailPaperSection extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: AppColors.paperElevated,
+        color: context.palette.elevated,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.palette.border),
         boxShadow: AppShadows.soft,
       ),
       child: Column(
@@ -57,7 +58,7 @@ class DetailSectionLabel extends StatelessWidget {
       text,
       style: AppTypography.caption.copyWith(
         fontWeight: FontWeight.w600,
-        color: AppColors.inkSecondary,
+        color: context.palette.inkSecondary,
       ),
     );
   }

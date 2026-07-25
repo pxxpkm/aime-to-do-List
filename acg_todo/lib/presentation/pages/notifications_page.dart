@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/notification.dart';
@@ -72,13 +73,13 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 child: notifications.isEmpty
                     ? _emptyState()
                     : ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(horizontal: 16),
                         children: [
                           _maybeSection(
                             '今日目標',
                             grouped[ReminderTypes.dailyGoal],
                             Icons.flag_outlined,
-                            AppColors.anime,
+                            context.palette.anime,
                             itemMap,
                           ),
                           ..._deadlineSections(grouped, itemMap),
@@ -86,14 +87,14 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                             '已逾期',
                             grouped[ReminderTypes.overdue],
                             Icons.warning_amber,
-                            AppColors.danger,
+                            context.palette.danger,
                             itemMap,
                           ),
                           _maybeSection(
                             '進度停滯',
                             grouped[ReminderTypes.stale],
                             Icons.hourglass_disabled,
-                            AppColors.textSecondary,
+                            context.palette.inkSecondary,
                             itemMap,
                           ),
                         ],
@@ -123,7 +124,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           _deadlineSectionTitle(k),
           grouped[k],
           Icons.access_time,
-          AppColors.warning,
+          context.palette.warning,
           itemMap,
         ),
     ];
@@ -194,18 +195,18 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final subtitle = _subtitleFor(n.type);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8),
       child: Material(
-        color: AppColors.paperElevated,
+        color: context.palette.elevated,
         borderRadius: BorderRadius.circular(12),
         child: ListTile(
           title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: Text(
             subtitle,
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+            style: TextStyle(color: context.palette.inkMuted, fontSize: 12),
           ),
           trailing: isDaily || item == null
-              ? const Icon(Icons.chevron_right, color: AppColors.textMuted)
+              ? Icon(Icons.chevron_right, color: context.palette.inkMuted)
               : IconButton(
                   tooltip: '+1',
                   icon: Icon(Icons.add_circle, color: color),
@@ -258,11 +259,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.notifications_none,
-              size: 64, color: AppColors.inkMuted),
-          const SizedBox(height: 12),
+              size: 64, color: context.palette.inkMuted),
+          SizedBox(height: 12),
           Text(
             '目前沒有通知',
-            style: const TextStyle(color: AppColors.inkMuted),
+            style: TextStyle(color: context.palette.inkMuted),
           ),
           const SizedBox(height: 8),
           TextButton(

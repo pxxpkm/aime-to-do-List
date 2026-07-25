@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/presentation/providers/folders_provider.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
 import 'package:acg_todo/presentation/widgets/folder_chip_bar.dart';
@@ -17,7 +18,7 @@ Future<void> showMoveToFolderSheet(
 
   await showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AppColors.paperElevated,
+    backgroundColor: context.palette.elevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
@@ -39,7 +40,7 @@ Future<void> showMoveToFolderSheet(
                 currentFolderId == null
                     ? Icons.radio_button_checked
                     : Icons.radio_button_off,
-                color: AppColors.textSecondary,
+                color: context.palette.inkSecondary,
               ),
               title: const Text('未分類'),
               onTap: () async {
@@ -57,7 +58,7 @@ Future<void> showMoveToFolderSheet(
                       : Icons.folder_outlined,
                   color: folder.colorValue != null
                       ? Color(folder.colorValue!)
-                      : AppColors.manga,
+                      : context.palette.manga,
                 ),
                 title: Text(folder.name),
                 onTap: () async {
@@ -68,8 +69,8 @@ Future<void> showMoveToFolderSheet(
                 },
               ),
             ListTile(
-              leading: const Icon(Icons.create_new_folder_outlined,
-                  color: AppColors.anime),
+              leading: Icon(Icons.create_new_folder_outlined,
+                  color: context.palette.anime),
               title: const Text('新建並移入'),
               onTap: () async {
                 Navigator.pop(ctx);

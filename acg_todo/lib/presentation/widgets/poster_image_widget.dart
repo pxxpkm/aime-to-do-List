@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/presentation/widgets/shimmer_placeholder.dart';
 
@@ -126,7 +127,7 @@ class _PosterImageWidgetState extends ConsumerState<PosterImageWidget> {
   }
 
   Widget _buildFallback() {
-    final color = AppColors.getTypeColor(widget.type);
+    final color = context.palette.typeColor(widget.type);
     return Container(
       width: widget.width,
       height: widget.height,
@@ -136,7 +137,7 @@ class _PosterImageWidgetState extends ConsumerState<PosterImageWidget> {
           end: Alignment.bottomRight,
           colors: [
             color.withValues(alpha: 0.18),
-            AppColors.paperBg,
+            context.palette.bg,
           ],
         ),
         borderRadius: widget.borderRadius,

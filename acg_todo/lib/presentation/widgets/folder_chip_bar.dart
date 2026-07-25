@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/domain/entities/folder.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/system_folders.dart';
@@ -66,13 +67,13 @@ class FolderChipBar extends ConsumerWidget {
           final hot = candidate.isNotEmpty ||
               dropHighlightFolderId == folderId;
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 120),
+            duration: Duration(milliseconds: 120),
             decoration: hot
                 ? BoxDecoration(
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.anime.withValues(alpha: 0.45),
+                        color: context.palette.anime.withValues(alpha: 0.45),
                         blurRadius: 8,
                       ),
                     ],
@@ -88,23 +89,23 @@ class FolderChipBar extends ConsumerWidget {
       height: 40,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16),
         children: [
           _FolderChip(
             label: '全部',
             count: countIn(null),
             selected: selectedFolderFilter == null,
-            color: AppColors.textPrimary,
+            color: context.palette.ink,
             onTap: () => onSelected(null),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           dropWrap(
             folderId: kFolderFilterUncategorized,
             child: _FolderChip(
               label: '未分類',
               count: countIn(kFolderFilterUncategorized),
               selected: selectedFolderFilter == kFolderFilterUncategorized,
-              color: AppColors.textSecondary,
+              color: context.palette.inkSecondary,
               onTap: () => onSelected(kFolderFilterUncategorized),
             ),
           ),
@@ -118,7 +119,7 @@ class FolderChipBar extends ConsumerWidget {
                 selected: selectedFolderFilter == folder.id,
                 color: folder.colorValue != null
                     ? Color(folder.colorValue!)
-                    : AppColors.manga,
+                    : context.palette.manga,
                 onTap: () => onSelected(folder.id),
                 onLongPress: () => _showFolderActions(context, ref, folder),
               ),
@@ -155,7 +156,7 @@ class FolderChipBar extends ConsumerWidget {
     }
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: AppColors.paperElevated,
+      backgroundColor: context.palette.elevated,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -164,12 +165,12 @@ class FolderChipBar extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: const Text('重新命名'),
+              leading: Icon(Icons.edit_outlined),
+              title: Text('重新命名'),
               onTap: () => Navigator.pop(ctx, 'rename'),
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.danger),
+              leading: Icon(Icons.delete_outline, color: context.palette.danger),
               title: const Text('刪除資料夾'),
               subtitle: const Text('作品會回到未分類'),
               onTap: () => Navigator.pop(ctx, 'delete'),
@@ -198,11 +199,11 @@ class FolderChipBar extends ConsumerWidget {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('取消')),
+                child: Text('取消')),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('刪除',
-                  style: TextStyle(color: AppColors.danger)),
+              child: Text('刪除',
+                  style: TextStyle(color: context.palette.danger)),
             ),
           ],
         ),
@@ -283,14 +284,14 @@ class _FolderChip extends StatelessWidget {
 class _AddFolderChip extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _AddFolderChip({required this.onTap});
+  _AddFolderChip({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return PaperFilterChip(
       label: '新建',
       selected: false,
-      accent: AppColors.inkMuted,
+      accent: context.palette.inkMuted,
       onTap: onTap,
       icon: Icons.add,
     );

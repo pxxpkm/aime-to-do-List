@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/item_display.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
@@ -250,7 +251,7 @@ class _HomeHeroStageState extends ConsumerState<HomeHeroStage> {
     }
 
     final title = displayTitle(hero.title, simpToTrad: s2t);
-    final accent = AppColors.getTypeColor(hero.type);
+    final accent = context.palette.typeColor(hero.type);
 
     // Precache neighbors once per displayed id (after frame).
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -312,7 +313,7 @@ class _HomeHeroStageState extends ConsumerState<HomeHeroStage> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: AppColors.borderSubtle
+                                color: context.palette.border
                                     .withValues(alpha: 0.85),
                               ),
                               boxShadow: const [
@@ -637,7 +638,7 @@ class _HeroBtn extends StatelessWidget {
 
     return Material(
       color: filled
-          ? AppColors.anime
+          ? context.palette.anime
           : Colors.white.withValues(alpha: 0.18),
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
@@ -665,18 +666,18 @@ class _EmptyHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      padding: EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: AppColors.paperElevated,
-        border: Border.all(color: AppColors.borderSubtle),
+        color: context.palette.elevated,
+        border: Border.all(color: context.palette.border),
       ),
       child: Column(
         children: [
           Icon(
             Icons.auto_awesome,
             size: 44,
-            color: AppColors.anime.withValues(alpha: 0.75),
+            color: context.palette.anime.withValues(alpha: 0.75),
           ),
           const SizedBox(height: 14),
           Text('架上還沒有作品', style: AppTypography.title.copyWith(fontSize: 18)),

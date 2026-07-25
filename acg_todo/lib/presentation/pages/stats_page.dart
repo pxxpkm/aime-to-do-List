@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/data/local/goal_settings_store.dart';
@@ -54,26 +55,26 @@ class StatsPage extends ConsumerWidget {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+                padding: EdgeInsets.fromLTRB(20, 8, 20, 40),
                 children: [
                   Row(
                     children: [
                       _SummaryCard(
                         label: '全部',
                         value: '$total',
-                        color: AppColors.inkPrimary,
+                        color: context.palette.ink,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       _SummaryCard(
                         label: '進行中',
                         value: '$inProgress',
-                        color: AppColors.manga,
+                        color: context.palette.manga,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       _SummaryCard(
                         label: '已完成',
                         value: '$completed',
-                        color: AppColors.success,
+                        color: context.palette.success,
                       ),
                     ],
                   ),
@@ -82,11 +83,11 @@ class StatsPage extends ConsumerWidget {
                     '目標進度',
                     style: AppTypography.title.copyWith(fontSize: 16),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     '只清目標累計（今日/滾動/月/年），不會改作品集數。',
                     style: AppTypography.micro.copyWith(
-                      color: AppColors.inkMuted,
+                      color: context.palette.inkMuted,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -102,10 +103,10 @@ class StatsPage extends ConsumerWidget {
                         body: '會清空所有日期的目標累計。作品進度不受影響。',
                         onConfirm: () => store.clearAllProgressDays(),
                       ),
-                      icon: const Icon(Icons.restart_alt, size: 18),
-                      label: const Text('全部重設'),
+                      icon: Icon(Icons.restart_alt, size: 18),
+                      label: Text('全部重設'),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.danger,
+                        foregroundColor: context.palette.danger,
                       ),
                     ),
                   ),
@@ -127,7 +128,7 @@ class StatsPage extends ConsumerWidget {
                       ),
                     )
                   else
-                    _emptyChart(),
+                    _emptyChart(context),
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 16,
@@ -144,11 +145,11 @@ class StatsPage extends ConsumerWidget {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          SizedBox(width: 6),
                           Text(
                             '${c.label} (${byCategory[c.storageKey]})',
                             style: AppTypography.caption.copyWith(
-                              color: AppColors.inkSecondary,
+                              color: context.palette.inkSecondary,
                             ),
                           ),
                         ],
@@ -166,7 +167,7 @@ class StatsPage extends ConsumerWidget {
                     child: BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
-                        barGroups: _progressBarGroups(store),
+                        barGroups: _progressBarGroups(context, store),
                         titlesData: FlTitlesData(
                           show: true,
                           bottomTitles: AxisTitles(
@@ -176,14 +177,14 @@ class StatsPage extends ConsumerWidget {
                               getTitlesWidget: (value, meta) {
                                 final i = value.toInt();
                                 if (i < 0 || i > 13) {
-                                  return const SizedBox.shrink();
+                                  return SizedBox.shrink();
                                 }
                                 final d = DateTime.now()
                                     .subtract(Duration(days: 13 - i));
                                 return Text(
                                   '${d.month}/${d.day}',
                                   style: AppTypography.micro.copyWith(
-                                    color: AppColors.inkMuted,
+                                    color: context.palette.inkMuted,
                                     fontSize: 9,
                                   ),
                                 );
@@ -235,7 +236,7 @@ class StatsPage extends ConsumerWidget {
     }).toList();
   }
 
-  List<BarChartGroupData> _progressBarGroups(GoalSettingsStore store) {
+  List<BarChartGroupData> _progressBarGroups(BuildContext context, GoalSettingsStore store) {
     final now = DateTime.now();
     return List.generate(14, (i) {
       final d = now.subtract(Duration(days: 13 - i));
@@ -245,7 +246,7 @@ class StatsPage extends ConsumerWidget {
         barRods: [
           BarChartRodData(
             toY: units.toDouble(),
-            color: AppColors.anime,
+            color: context.palette.anime,
             width: 10,
             borderRadius: BorderRadius.circular(4),
           ),
@@ -254,7 +255,7 @@ class StatsPage extends ConsumerWidget {
     });
   }
 
-  Widget _emptyChart() {
+  Widget _emptyChart(context) {
     return SizedBox(
       height: 200,
       child: Center(
@@ -264,12 +265,12 @@ class StatsPage extends ConsumerWidget {
             Icon(
               Icons.pie_chart_outline,
               size: 48,
-              color: AppColors.inkMuted.withValues(alpha: 0.6),
+              color: context.palette.inkMuted.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               '新增項目後即可查看統計',
-              style: AppTypography.caption.copyWith(color: AppColors.inkMuted),
+              style: AppTypography.caption.copyWith(color: context.palette.inkMuted),
             ),
           ],
         ),
@@ -292,11 +293,11 @@ class _GoalProgressSection extends ConsumerWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
+      padding: EdgeInsets.fromLTRB(14, 12, 8, 8),
       decoration: BoxDecoration(
-        color: AppColors.paperElevated,
+        color: context.palette.elevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.palette.border),
       ),
       child: Column(
         children: [
@@ -312,7 +313,7 @@ class _GoalProgressSection extends ConsumerWidget {
               ),
             ),
             if (p != visible.last)
-              const Divider(height: 16, color: AppColors.divider),
+              Divider(height: 16, color: context.palette.divider),
           ],
         ],
       ),
@@ -337,7 +338,7 @@ class _GoalPeriodRow extends StatelessWidget {
   final GoalPeriodProgress period;
   final VoidCallback onReset;
 
-  const _GoalPeriodRow({
+  _GoalPeriodRow({
     required this.period,
     required this.onReset,
   });
@@ -345,7 +346,7 @@ class _GoalPeriodRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color =
-        period.isComplete ? AppColors.success : AppColors.anime;
+        period.isComplete ? context.palette.success : context.palette.anime;
     return Row(
       children: [
         Expanded(
@@ -356,7 +357,7 @@ class _GoalPeriodRow extends StatelessWidget {
                 period.label,
                 style: AppTypography.caption.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.inkPrimary,
+                  color: context.palette.ink,
                 ),
               ),
               const SizedBox(height: 4),
@@ -373,7 +374,7 @@ class _GoalPeriodRow extends StatelessWidget {
                   Text(
                     ' / ${period.target}',
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.inkSecondary,
+                      color: context.palette.inkSecondary,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -388,13 +389,13 @@ class _GoalPeriodRow extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(99),
                 child: LinearProgressIndicator(
                   value: period.progress.clamp(0.0, 1.0),
                   minHeight: 5,
-                  backgroundColor: AppColors.divider,
+                  backgroundColor: context.palette.divider,
                   color: color,
                 ),
               ),
@@ -407,8 +408,8 @@ class _GoalPeriodRow extends StatelessWidget {
           icon: Icon(
             Icons.restart_alt_rounded,
             color: period.current > 0
-                ? AppColors.inkSecondary
-                : AppColors.inkMuted.withValues(alpha: 0.35),
+                ? context.palette.inkSecondary
+                : context.palette.inkMuted.withValues(alpha: 0.35),
           ),
         ),
       ],
@@ -431,11 +432,11 @@ Future<void> _confirmReset(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('取消'),
+          child: Text('取消'),
         ),
         TextButton(
           onPressed: () => Navigator.pop(ctx, true),
-          style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+          style: TextButton.styleFrom(foregroundColor: context.palette.danger),
           child: const Text('重設'),
         ),
       ],
@@ -470,9 +471,9 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.paperElevated,
+          color: context.palette.elevated,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color.withValues(alpha: 0.25)),
           boxShadow: const [
@@ -493,11 +494,11 @@ class _SummaryCard extends StatelessWidget {
                 color: color,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               label,
               style: AppTypography.caption.copyWith(
-                color: AppColors.inkSecondary,
+                color: context.palette.inkSecondary,
               ),
             ),
           ],

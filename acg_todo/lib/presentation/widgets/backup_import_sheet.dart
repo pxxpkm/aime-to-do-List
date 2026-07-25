@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:acg_todo/core/theme/app_colors.dart';
+import 'package:acg_todo/core/theme/app_palette.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/web_file_io.dart';
 import 'package:acg_todo/data/repositories/library_backup_repository.dart';
@@ -16,7 +17,7 @@ Future<void> showBackupImportSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.paperElevated,
+    backgroundColor: context.palette.elevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -120,11 +121,11 @@ class _BackupImportSheetState extends ConsumerState<BackupImportSheet> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('取消'),
+              child: Text('取消'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+              style: TextButton.styleFrom(foregroundColor: context.palette.danger),
               child: const Text('確定取代'),
             ),
           ],
@@ -177,7 +178,7 @@ class _BackupImportSheetState extends ConsumerState<BackupImportSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.divider,
+                  color: context.palette.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -213,13 +214,13 @@ class _BackupImportSheetState extends ConsumerState<BackupImportSheet> {
             TextField(
               controller: _pasteController,
               maxLines: 5,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '或在此貼上備份 JSON…',
                 alignLabelWithHint: true,
               ),
               style: AppTypography.micro.copyWith(
                 fontFamily: 'monospace',
-                color: AppColors.inkPrimary,
+                color: context.palette.ink,
               ),
             ),
             const SizedBox(height: 12),
@@ -262,26 +263,26 @@ class _BackupImportSheetState extends ConsumerState<BackupImportSheet> {
                     ? '一併合併每日進度（目標設定保留本機）'
                     : '一併還原目標與進度設定',
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.inkPrimary,
+                  color: context.palette.ink,
                 ),
               ),
               controlAffinity: ListTileControlAffinity.leading,
             ),
             if (_error != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 _error!,
-                style: AppTypography.caption.copyWith(color: AppColors.danger),
+                style: AppTypography.caption.copyWith(color: context.palette.danger),
               ),
             ],
             if (_preview != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.paperSurface,
+                  color: context.palette.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.borderSubtle),
+                  border: Border.all(color: context.palette.border),
                 ),
                 child: Text(
                   _mode == BackupImportMode.replace

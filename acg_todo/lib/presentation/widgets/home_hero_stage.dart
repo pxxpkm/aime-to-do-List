@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:acg_todo/core/theme/app_colors.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/item_display.dart';
+import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/presentation/home/home_hero_pool.dart';
 import 'package:acg_todo/presentation/pages/item_detail/poster_fullscreen_dialog.dart';
@@ -42,6 +44,7 @@ class _HomeHeroStageState extends ConsumerState<HomeHeroStage> {
   /// When true, arrows overrode the resolved (daily/pinned) hero for this session.
   bool _userBrowsing = false;
   String? _shownId;
+  String? _lastPrecacheAroundId;
   final _focusNode = FocusNode(debugLabel: 'home_hero');
 
   @override
@@ -100,7 +103,28 @@ class _HomeHeroStageState extends ConsumerState<HomeHeroStage> {
     setState(() {
       _userBrowsing = true;
       _shownId = pool[safe].id;
+      _lastPrecacheAroundId = null; // force re-warm after step
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _precacheNeighbors(pool, safe);
+    });
+  }
+
+  /// Warm adjacent posters so arrow / swipe feels instant.
+  void _precacheNeighbors(List<Item> pool, int index) {
+    if (pool.length < 2 || !mounted) return;
+    final aroundId = pool[index.clamp(0, pool.length - 1)].id;
+    if (_lastPrecacheAroundId == aroundId) return;
+    _lastPrecacheAroundId = aroundId;
+    for (final delta in const [-1, 1]) {
+      final i = heroStepIndex(index, delta, pool.length);
+      final raw = pool[i].posterUrl;
+      final url = normalizePosterUrl(raw);
+      if (url == null || url.startsWith('data:')) continue;
+      final loadUrl = kIsWeb ? toProxyUrl(url) : url;
+      // Fire-and-forget; ignore failures (offline / CORS).
+      precacheImage(NetworkImage(loadUrl), context).ignore();
+    }
   }
 
   void _onHorizontalDragEnd(
@@ -227,6 +251,12 @@ class _HomeHeroStageState extends ConsumerState<HomeHeroStage> {
 
     final title = displayTitle(hero.title, simpToTrad: s2t);
     final accent = AppColors.getTypeColor(hero.type);
+
+    // Precache neighbors once per displayed id (after frame).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _precacheNeighbors(pool, heroIndex);
+    });
 
     final stage = LayoutBuilder(
       builder: (context, constraints) {

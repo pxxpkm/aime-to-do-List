@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
@@ -49,9 +50,15 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   bool _searchOpen = false;
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
+  final _pageFocus = FocusNode(debugLabel: 'library_page');
 
   HomeSortMode get _sortMode =>
       ref.read(goalSettingsStoreProvider).homeSortMode;
+
+  BoxFit get _posterFit {
+    final fit = ref.read(goalSettingsStoreProvider).posterImageFit;
+    return fit == 'contain' ? BoxFit.contain : BoxFit.cover;
+  }
 
   String get _searchQuery => _searchController.text;
 
@@ -85,6 +92,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   void dispose() {
     _searchController.dispose();
     _searchFocus.dispose();
+    _pageFocus.dispose();
     super.dispose();
   }
 
@@ -116,6 +124,38 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       _searchOpen = false;
       _searchController.clear();
     });
+    _pageFocus.requestFocus();
+  }
+
+  void _selectAllFiltered(List<Item> items) {
+    if (!_selectionMode || items.isEmpty) return;
+    setState(() {
+      _selectedIds
+        ..clear()
+        ..addAll(items.map((e) => e.id));
+    });
+  }
+
+  void _onSlashShortcut() {
+    if (_selectionMode) return;
+    // Don't steal keys while the search field (or any text field) is focused.
+    if (_searchFocus.hasFocus) return;
+    final primary = FocusManager.instance.primaryFocus;
+    if (primary?.context?.findAncestorStateOfType<EditableTextState>() !=
+        null) {
+      return;
+    }
+    _openSearch();
+  }
+
+  void _onEscapeShortcut() {
+    if (_searchOpen || _hasSearch) {
+      _closeSearch();
+      return;
+    }
+    if (_selectionMode) {
+      _exitSelection();
+    }
   }
 
   void _toggleSelect(String id) {
@@ -505,7 +545,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final gridItems = filtered;
     final allTags = ref.read(itemsRepositoryProvider).allTags();
 
-    return AppScaffold(
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.slash): _onSlashShortcut,
+        const SingleActivator(LogicalKeyboardKey.escape): _onEscapeShortcut,
+        const SingleActivator(LogicalKeyboardKey.keyA, control: true): () =>
+            _selectAllFiltered(filtered),
+        const SingleActivator(LogicalKeyboardKey.keyA, meta: true): () =>
+            _selectAllFiltered(filtered),
+      },
+      child: Focus(
+        focusNode: _pageFocus,
+        autofocus: true,
+        child: AppScaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -834,6 +886,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           elevation: 0,
         ),
       ),
+    ),
+      ),
     );
   }
 
@@ -973,6 +1027,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             child: PosterCard(
               item: item,
               density: PosterCardDensity.poster,
+              imageFit: _posterFit,
               showIncrement: false,
             ),
           ),
@@ -991,6 +1046,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     Key? key,
     required bool longPressOpensMenu,
   }) {
+    final imageFit = _posterFit;
     if (_selectionMode) {
       final selected = _selectedIds.contains(item.id);
       return Stack(
@@ -1000,6 +1056,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             key: key,
             item: item,
             density: PosterCardDensity.poster,
+            imageFit: imageFit,
             selected: selected,
             showIncrement: false,
             onTap: () => _toggleSelect(item.id),
@@ -1037,6 +1094,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       key: key,
       item: item,
       density: PosterCardDensity.poster,
+      imageFit: imageFit,
       onTap: () => context.push('/item/${item.id}'),
       onIncrement: () => _onIncrement(item),
       onMenu: () => _showItemMenu(item),

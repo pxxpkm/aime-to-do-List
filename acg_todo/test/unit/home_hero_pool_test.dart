@@ -104,7 +104,7 @@ void main() {
 
     test('desktop is wider than legacy 340/560 caps', () {
       final s = gachaPosterSize(screenWidth: 1440, screenHeight: 900);
-      expect(s.width, greaterThan(400));
+      expect(s.width, greaterThan(360));
       expect(s.width, lessThanOrEqualTo(640));
     });
 
@@ -113,13 +113,26 @@ void main() {
       expect(s.width, lessThanOrEqualTo(640.0 + 0.5));
     });
 
+    test('result chrome leaves room for action buttons', () {
+      // Result state uses ~220 chrome so poster + buttons don't collide.
+      const chrome = 220.0;
+      final s = gachaPosterSize(
+        screenWidth: 1440,
+        screenHeight: 900,
+        chromeHeight: chrome,
+      );
+      expect(s.height + chrome, lessThanOrEqualTo(900 + 1));
+      // Poster must not consume almost all height (buttons need air).
+      expect(s.height, lessThan(900 - chrome));
+    });
+
     test('narrow phone still fits height budget', () {
       final s = gachaPosterSize(
         screenWidth: 390,
         screenHeight: 844,
-        chromeHeight: 152,
+        chromeHeight: 220,
       );
-      expect(s.height, lessThanOrEqualTo(844 - 152 + 1));
+      expect(s.height, lessThanOrEqualTo(844 - 220 + 1));
       expect(s.width / s.height, closeTo(2 / 3, 0.02));
     });
   });

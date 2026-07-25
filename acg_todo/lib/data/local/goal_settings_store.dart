@@ -20,6 +20,9 @@ class GoalSettingsStore {
   static const _titleS2tKey = 'title_simp_to_trad';
   static const _homeHeroModeKey = 'home_hero_mode';
   static const _homeHeroItemIdKey = 'home_hero_item_id';
+  /// Library wall image fit: cover | contain
+  static const _posterFitKey = 'poster_image_fit';
+  static const _lastBackupAtKey = 'last_backup_at';
   static const _rollingDaysKey = 'goal_rolling_days';
   static const _rollingTargetKey = 'goal_rolling_target';
   static const _monthTargetKey = 'goal_month_target';
@@ -87,6 +90,8 @@ class GoalSettingsStore {
       _putLocal(_titleS2tKey, u['title_simp_to_trad']);
       _putLocal(_homeHeroModeKey, u['home_hero_mode']);
       _putLocal(_homeHeroItemIdKey, u['home_hero_item_id']);
+      _putLocal(_posterFitKey, u['poster_image_fit']);
+      _putLocal(_lastBackupAtKey, u['last_backup_at']);
     }
     final days = settings['progressDays'];
     if (days is Map) {
@@ -265,6 +270,36 @@ class GoalSettingsStore {
   Future<void> pinHomeHero(String itemId) async {
     await setHomeHeroItemId(itemId);
     await setHomeHeroMode('pinned');
+  }
+
+  /// Library poster wall: `cover` (default, crop fill) or `contain` (full art).
+  String get posterImageFit {
+    final v = _kv.get(_posterFitKey) as String?;
+    if (v == 'contain' || v == 'cover') return v!;
+    return 'cover';
+  }
+
+  Future<void> setPosterImageFit(String fit) async {
+    if (fit != 'cover' && fit != 'contain') return;
+    await _kv.put(_posterFitKey, fit);
+  }
+
+  /// ISO-8601 UTC of last successful export; null if never.
+  String? get lastBackupAtIso {
+    final v = _kv.get(_lastBackupAtKey) as String?;
+    if (v == null || v.isEmpty) return null;
+    return v;
+  }
+
+  DateTime? get lastBackupAt {
+    final iso = lastBackupAtIso;
+    if (iso == null) return null;
+    return DateTime.tryParse(iso);
+  }
+
+  Future<void> markBackupExported([DateTime? at]) async {
+    final t = (at ?? DateTime.now()).toUtc();
+    await _kv.put(_lastBackupAtKey, t.toIso8601String());
   }
 
   String dayKey([DateTime? now]) {
@@ -454,6 +489,8 @@ class GoalSettingsStore {
         'title_simp_to_trad': titleSimpToTrad,
         'home_hero_mode': homeHeroMode,
         'home_hero_item_id': homeHeroItemId ?? '',
+        'poster_image_fit': posterImageFit,
+        'last_backup_at': lastBackupAtIso ?? '',
       },
       'progressDays': progressDays,
     };
@@ -538,6 +575,12 @@ class GoalSettingsStore {
       final heroId = u['home_hero_item_id'];
       if (heroId is String) {
         await setHomeHeroItemId(heroId.isEmpty ? null : heroId);
+      }
+      final fit = u['poster_image_fit'];
+      if (fit is String) await setPosterImageFit(fit);
+      final lastBak = u['last_backup_at'];
+      if (lastBak is String && lastBak.isNotEmpty) {
+        await _kv.put(_lastBackupAtKey, lastBak);
       }
     }
   }

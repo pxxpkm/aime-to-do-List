@@ -330,6 +330,8 @@ Future<void> exportLibraryBackup(WidgetRef ref, BuildContext context) async {
   final name = 'acg-todo-backup-$stamp.json';
   try {
     await downloadTextFile(name, json);
+    await ref.read(goalSettingsStoreProvider).markBackupExported();
+    ref.read(dailyGoalTickProvider.notifier).state++;
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('已下載 $name')),
@@ -337,6 +339,8 @@ Future<void> exportLibraryBackup(WidgetRef ref, BuildContext context) async {
     }
   } catch (_) {
     await Clipboard.setData(ClipboardData(text: json));
+    await ref.read(goalSettingsStoreProvider).markBackupExported();
+    ref.read(dailyGoalTickProvider.notifier).state++;
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

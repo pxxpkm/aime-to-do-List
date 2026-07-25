@@ -47,18 +47,21 @@ int heroIndexOf(List<Item> pool, String? itemId) {
 
 /// Gacha dialog poster size: height-first 2:3, immersive on desktop.
 ///
-/// [chromeHeight] = title + buttons + padding reserved above/below the card.
-/// Max width ~640 so the result card reads closer to the home hero stage.
+/// [chromeHeight] = title + gaps + action buttons + safe padding reserved
+/// **outside** the card (must be large enough that buttons never sit under
+/// the poster). Max width ~640.
 ({double width, double height}) gachaPosterSize({
   required double screenWidth,
   required double screenHeight,
-  double chromeHeight = 152,
+  double chromeHeight = 220,
 }) {
   final maxW = (screenWidth * 0.96).clamp(200.0, 640.0);
   final availableH =
-      (screenHeight - chromeHeight).clamp(240.0, screenHeight);
+      (screenHeight - chromeHeight).clamp(220.0, screenHeight);
 
-  var cardH = availableH * 0.95;
+  // Leave a little air inside the budget so shadows / borders don't crowd
+  // the action row below.
+  var cardH = availableH * 0.90;
   var cardW = cardH / 1.5;
   if (cardW > maxW) {
     cardW = maxW;

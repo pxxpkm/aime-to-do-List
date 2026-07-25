@@ -62,4 +62,37 @@ void main() {
     await store.setGoalUnits(2000);
     expect(store.goalUnits, 999);
   });
+
+  test('posterImageFit defaults cover and accepts contain', () async {
+    expect(store.posterImageFit, 'cover');
+    await store.setPosterImageFit('contain');
+    expect(store.posterImageFit, 'contain');
+    await store.setPosterImageFit('nope');
+    expect(store.posterImageFit, 'contain');
+    await store.setPosterImageFit('cover');
+    expect(store.posterImageFit, 'cover');
+  });
+
+  test('posterImageFit round-trips in export/backup', () async {
+    await store.setPosterImageFit('contain');
+    final bundle = store.exportForBackup();
+    expect((bundle['ui'] as Map)['poster_image_fit'], 'contain');
+
+    final box2 = await Hive.openBox(
+      'goal_test_fit_${DateTime.now().microsecondsSinceEpoch}',
+    );
+    final store2 = GoalSettingsStore(box2);
+    await store2.applyBackupSettings(bundle);
+    expect(store2.posterImageFit, 'contain');
+    await box2.clear();
+    await box2.close();
+  });
+
+  test('markBackupExported sets lastBackupAt', () async {
+    expect(store.lastBackupAt, isNull);
+    final at = DateTime.utc(2026, 7, 25, 10);
+    await store.markBackupExported(at);
+    expect(store.lastBackupAtIso, at.toIso8601String());
+    expect(store.lastBackupAt, at);
+  });
 }

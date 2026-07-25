@@ -6,8 +6,7 @@ import 'package:acg_todo/core/theme/app_colors.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/utils/poster_url.dart';
 import 'package:acg_todo/core/utils/zh_convert.dart';
-import 'package:acg_todo/data/repositories/bangumi/bangumi_search_result.dart';
-import 'package:acg_todo/data/repositories/bangumi/mappers.dart';
+import 'package:acg_todo/data/metadata/source_candidate.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
@@ -17,8 +16,8 @@ import 'package:acg_todo/presentation/widgets/poster_image_widget.dart';
 class _BatchRow {
   final String query;
   final String searchQuery;
-  List<BangumiSearchResult> candidates;
-  BangumiSearchResult? selected;
+  List<SourceCandidate> candidates;
+  SourceCandidate? selected;
   bool loading;
   bool checked;
   String? error;
@@ -64,7 +63,7 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
     if (lines.isEmpty) return;
 
     final t2s = ref.read(goalSettingsStoreProvider).searchTradToSimp;
-    final client = ref.read(bangumiClientProvider);
+    final registry = ref.read(sourceRegistryProvider);
     final existing = ref.read(itemsNotifierProvider).map((e) => e.id).toSet();
 
     setState(() {
@@ -80,11 +79,14 @@ class _BatchAddPageState extends ConsumerState<BatchAddPage> {
     for (var i = 0; i < _rows!.length; i++) {
       final row = _rows![i];
       try {
-        final results =
-            await client.search(row.searchQuery, _category.bangumiType);
+        final results = await registry.search(
+          'bangumi',
+          row.searchQuery,
+          _category,
+        );
         if (!mounted) return;
         final first = results.isNotEmpty ? results.first : null;
-        final id = first != null ? 'bgm_${first.id}' : null;
+        final id = first?.libraryId;
         setState(() {
           row.candidates = results;
           row.selected = first;

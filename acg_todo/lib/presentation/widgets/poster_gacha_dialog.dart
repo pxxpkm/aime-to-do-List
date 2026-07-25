@@ -156,13 +156,16 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
         ? displayTitle(shown.title, simpToTrad: s2t)
         : '';
 
-    // Immersive 2:3 stage — height-first, desktop max ~640 wide.
+    // Immersive 2:3 stage — reserve enough chrome so action buttons never
+    // sit under the poster (result Wrap can be 1–2 rows ≈ 100–120px).
     final screen = MediaQuery.sizeOf(context);
-    final chrome = _rolling ? 110.0 : 152.0;
+    final pad = MediaQuery.paddingOf(context);
+    // title+subtitle+gaps ≈ 56; gap under card 28; actions 2 rows ≈ 108; bottom 16
+    final chrome = _rolling ? 140.0 : 220.0;
     final size = gachaPosterSize(
       screenWidth: screen.width,
       screenHeight: screen.height,
-      chromeHeight: chrome + MediaQuery.paddingOf(context).vertical,
+      chromeHeight: chrome + pad.vertical,
     );
     final cardW = size.width;
     final cardH = size.height;
@@ -172,7 +175,7 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
       child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -183,101 +186,98 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                     fontSize: 20,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   '純娛樂 · 不影響釘選',
                   style: AppTypography.micro.copyWith(color: Colors.white70),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
+                // Clip so confetti/shadow cannot paint over the button row.
                 Stack(
                   alignment: Alignment.center,
-                  clipBehavior: Clip.none,
+                  clipBehavior: Clip.hardEdge,
                   children: [
-                    AnimatedScale(
-                      scale: _result != null
-                          ? 1.04
-                          : (_rolling ? 1.02 : 1.0),
+                    // No scale > 1.0: AnimatedScale used to overflow into buttons.
+                    AnimatedContainer(
                       duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOutBack,
-                      child: Container(
-                        width: cardW,
-                        height: cardH,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _result != null
-                                ? AppColors.anime
-                                : Colors.white24,
-                            width: _result != null ? 2.5 : 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: (_result != null
-                                      ? AppColors.anime
-                                      : Colors.black)
-                                  .withValues(alpha: 0.45),
-                              blurRadius: 28,
-                              offset: const Offset(0, 12),
-                            ),
-                          ],
+                      curve: Curves.easeOutCubic,
+                      width: cardW,
+                      height: cardH,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _result != null
+                              ? AppColors.anime
+                              : Colors.white24,
+                          width: _result != null ? 2.5 : 1,
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(11),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              if (shown != null)
-                                PosterImageWidget(
-                                  key: ValueKey(
-                                    'gacha_${shown.id}_$_rollStep',
-                                  ),
-                                  posterUrl: shown.posterUrl,
-                                  type: shown.type,
-                                  fit: BoxFit.cover,
-                                )
-                              else
-                                const ColoredBox(color: Color(0xFF2C2416)),
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                height: 72,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withValues(alpha: 0.85),
-                                      ],
-                                    ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (_result != null
+                                    ? AppColors.anime
+                                    : Colors.black)
+                                .withValues(alpha: _result != null ? 0.5 : 0.4),
+                            blurRadius: _result != null ? 32 : 24,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(11),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (shown != null)
+                              PosterImageWidget(
+                                key: ValueKey(
+                                  'gacha_${shown.id}_$_rollStep',
+                                ),
+                                posterUrl: shown.posterUrl,
+                                type: shown.type,
+                                fit: BoxFit.cover,
+                              )
+                            else
+                              const ColoredBox(color: Color(0xFF2C2416)),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              height: 72,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withValues(alpha: 0.85),
+                                    ],
                                   ),
                                 ),
                               ),
-                              if (shown != null && !_rolling)
-                                Positioned(
-                                  left: 10,
-                                  right: 10,
-                                  bottom: 10,
-                                  child: Text(
-                                    title,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: AppTypography.cardTitle.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                    ),
+                            ),
+                            if (shown != null && !_rolling)
+                              Positioned(
+                                left: 10,
+                                right: 10,
+                                bottom: 10,
+                                child: Text(
+                                  title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: AppTypography.cardTitle.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 14,
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
                     Positioned(
-                      top: -8,
+                      top: 0,
                       child: ConfettiWidget(
                         confettiController: _confetti,
                         blastDirectionality: BlastDirectionality.explosive,
@@ -297,56 +297,63 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                // Explicit gap: buttons must never crowd the poster.
+                const SizedBox(height: 28),
                 if (_rolling)
-                  const SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white70,
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white70,
+                      ),
                     ),
                   )
                 else if (_result != null)
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: [
-                      FilledButton.icon(
-                        onPressed: _startRoll,
-                        icon: const Icon(Icons.casino, size: 18),
-                        label: const Text('再抽一次'),
-                      ),
-                      FilledButton.tonalIcon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.white24,
-                          foregroundColor: Colors.white,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        FilledButton.icon(
+                          onPressed: _startRoll,
+                          icon: const Icon(Icons.casino, size: 18),
+                          label: const Text('再抽一次'),
                         ),
-                        onPressed: () {
-                          final item = _result!;
-                          Navigator.of(context).pop();
-                          widget.onOpenItem(item);
-                        },
-                        icon: const Icon(Icons.open_in_new, size: 18),
-                        label: const Text('去看看'),
-                      ),
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
+                        FilledButton.tonalIcon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white24,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            final item = _result!;
+                            Navigator.of(context).pop();
+                            widget.onOpenItem(item);
+                          },
+                          icon: const Icon(Icons.open_in_new, size: 18),
+                          label: const Text('去看看'),
                         ),
-                        onPressed: () => _setAsHomeHero(_result!),
-                        icon: const Icon(Icons.image_outlined, size: 18),
-                        label: const Text('設為主頁海報'),
-                      ),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white70,
+                        TextButton.icon(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () => _setAsHomeHero(_result!),
+                          icon: const Icon(Icons.image_outlined, size: 18),
+                          label: const Text('設為主頁海報'),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('關閉'),
-                      ),
-                    ],
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white70,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('關閉'),
+                        ),
+                      ],
+                    ),
                   )
                 else
                   TextButton(

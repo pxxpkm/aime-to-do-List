@@ -49,6 +49,9 @@ class PosterCard extends ConsumerStatefulWidget {
   /// Strip: left accent for deadline risk (null = none).
   final ContinueRisk? continueRisk;
 
+  /// Image BoxFit; null → [BoxFit.cover]. Library may pass contain.
+  final BoxFit? imageFit;
+
   const PosterCard({
     super.key,
     required this.item,
@@ -63,6 +66,7 @@ class PosterCard extends ConsumerStatefulWidget {
     this.titleSimpToTrad,
     this.showStale = false,
     this.continueRisk,
+    this.imageFit,
   });
 
   @override
@@ -78,12 +82,20 @@ class _PosterCardState extends ConsumerState<PosterCard> {
   bool get _isPoster => widget.density == PosterCardDensity.poster;
 
   Widget _buildPosterHero() {
-    final image = PosterImageWidget(
-      key: ValueKey('poster_${item.id}'),
+    final fit = widget.imageFit ?? BoxFit.cover;
+    Widget image = PosterImageWidget(
+      key: ValueKey('poster_${item.id}_$fit'),
       posterUrl: item.posterUrl,
       type: item.type,
-      fit: BoxFit.cover,
+      fit: fit,
     );
+    // Contain leaves letterbox — paper fill avoids harsh black bars.
+    if (fit == BoxFit.contain) {
+      image = ColoredBox(
+        color: AppColors.paperBg,
+        child: image,
+      );
+    }
     final tag = widget.heroTag;
     if (tag != null && tag.isEmpty) return image;
     return Hero(
@@ -333,16 +345,25 @@ class _PosterCardState extends ConsumerState<PosterCard> {
     final showPlus = widget.showIncrement && widget.onIncrement != null;
     final pinLeft = widget.onMenu != null ? 32.0 : 4.0;
 
+    // Title for strip (continue row) — keep 1 line so badges stay readable.
+    final bool s2t;
+    if (widget.titleSimpToTrad != null) {
+      s2t = widget.titleSimpToTrad!;
+    } else {
+      s2t = ref.read(goalSettingsStoreProvider).titleSimpToTrad;
+    }
+    final shownTitle = displayTitle(item.title, simpToTrad: s2t);
+
     return Stack(
       fit: StackFit.expand,
       children: [
         _buildPosterHero(),
-        // Bottom gradient for contrast
+        // Bottom gradient for contrast (taller for title + progress)
         Positioned(
           left: 0,
           right: 0,
           bottom: 0,
-          height: 56,
+          height: 72,
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -350,7 +371,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.black.withValues(alpha: 0),
-                  Colors.black.withValues(alpha: 0.72),
+                  Colors.black.withValues(alpha: 0.78),
                 ],
               ),
             ),
@@ -418,6 +439,21 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(
+                shownTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                  shadows: [
+                    Shadow(blurRadius: 4, color: Colors.black54),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 3),
               ClipRRect(
                 borderRadius: BorderRadius.circular(2),
                 child: LinearProgressIndicator(

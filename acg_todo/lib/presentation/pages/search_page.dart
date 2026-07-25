@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,19 +6,17 @@ import 'package:acg_todo/core/theme/app_colors.dart';
 import 'package:acg_todo/core/theme/app_scaffold.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/item_display.dart';
-import 'package:acg_todo/core/utils/poster_url.dart';
-import 'package:acg_todo/core/utils/zh_convert.dart';
+import 'package:acg_todo/data/metadata/source_candidate.dart';
 import 'package:acg_todo/data/models/media_source.dart';
-import 'package:acg_todo/data/repositories/bangumi/bangumi_search_result.dart';
-import 'package:acg_todo/data/repositories/bangumi/mappers.dart';
 import 'package:acg_todo/domain/entities/item_category.dart';
 import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
-import 'package:acg_todo/presentation/providers/items_provider.dart';
 import 'package:acg_todo/presentation/providers/repository_providers.dart';
+import 'package:acg_todo/presentation/providers/search_facade.dart';
 import 'package:acg_todo/presentation/widgets/category_chip.dart';
 import 'package:acg_todo/presentation/widgets/search_result_tile.dart';
 import 'package:acg_todo/presentation/widgets/shimmer_placeholder.dart';
 
+/// Search → add. Business logic lives in [searchFacadeProvider].
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
 
@@ -30,128 +26,36 @@ class SearchPage extends ConsumerStatefulWidget {
 
 class _SearchPageState extends ConsumerState<SearchPage> {
   final _searchController = TextEditingController();
-  Timer? _debounce;
-  ItemCategory _category = ItemCategory.anime;
-  MediaSource _source = MediaSource.bangumi;
-  bool _loading = false;
-  List<BangumiSearchResult> _results = [];
-  String? _convertedQuery;
-  final Set<String> _justAddedIds = {};
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged(String query) {
-    _debounce?.cancel();
-    if (query.trim().isEmpty) {
-      setState(() {
-        _results = [];
-        _convertedQuery = null;
-      });
-      return;
-    }
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      _search(query);
-    });
-  }
-
-  String _effectiveQuery(String raw) {
-    final q = raw.trim();
-    if (q.isEmpty) return q;
-    final useT2s = _source == MediaSource.bangumi &&
-        ref.read(goalSettingsStoreProvider).searchTradToSimp;
-    if (!useT2s) {
-      _convertedQuery = null;
-      return q;
-    }
-    final simp = traditionalToSimplified(q);
-    _convertedQuery = didConvertToSimplified(q, simp) ? simp : null;
-    return simp;
-  }
-
-  Future<void> _search(String query) async {
-    if (_category == ItemCategory.game && _source == MediaSource.anilist) {
-      return;
-    }
-    setState(() => _loading = true);
-    final q = _effectiveQuery(query);
-    final results =
-        await ref.read(searchMediaProvider(q, _category, _source).future);
-    if (mounted) {
-      setState(() {
-        _results = results;
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _addItem(BangumiSearchResult result) async {
-    var item = result.toItem(
-      'local_user',
-      preferredCategory: _category,
-    );
-    item = item.copyWith(posterUrl: normalizePosterUrl(item.posterUrl));
-    final ok = await ref.read(itemsNotifierProvider.notifier).addItem(item);
+  Future<void> _addItem(SourceCandidate c) async {
+    final id =
+        await ref.read(searchFacadeProvider.notifier).addCandidate(c);
     if (!mounted) return;
-    if (ok) {
-      setState(() => _justAddedIds.add(item.id));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('已新增「${item.title}」'),
-          duration: const Duration(milliseconds: 1200),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('「${item.title}」已在清單中'),
-          duration: const Duration(milliseconds: 1200),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  bool _isInList(BangumiSearchResult r) {
-    final candidates = <String>{
-      'bgm_${r.id}',
-      'anilist_${r.id}',
-      '${r.id}',
-    };
-    if (_justAddedIds.any(candidates.contains)) return true;
-    return ref.read(itemsNotifierProvider).any(
-          (i) =>
-              candidates.contains(i.id) ||
-              (i.anilistId != null && i.anilistId == r.id),
-        );
-  }
-
-  String _typeKeyFor(BangumiSearchResult r) {
-    return switch (r.type) {
-      2 => 'anime',
-      1 => _category == ItemCategory.lightNovel ? 'light_novel' : 'manga',
-      4 => 'game',
-      _ => _category.storageKey,
-    };
-  }
-
-  String _metaLine(BangumiSearchResult r) {
-    return [
-      if (r.episodes != null) '${r.episodes} 集',
-      if (r.chapters != null) '${r.chapters} 章',
-      if (r.volumes != null) '${r.volumes} 卷',
-      if (r.score != null) '★ ${r.score}',
-    ].join(' · ');
+    final title = displayTitle(
+      c.displayName,
+      simpToTrad: ref.read(goalSettingsStoreProvider).titleSimpToTrad,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(id != null ? '已新增「$title」' : '「$title」已在清單中'),
+        duration: const Duration(milliseconds: 1200),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     ref.watch(dailyGoalTickProvider);
+    final facade = ref.watch(searchFacadeProvider);
+    final facadeN = ref.read(searchFacadeProvider.notifier);
+
     return AppScaffold(
       body: SafeArea(
         child: Column(
@@ -202,67 +106,47 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     label: Text('Bangumi'),
                   ),
                 ],
-                selected: {_source},
-                style: ButtonStyle(
-                  visualDensity: VisualDensity.compact,
-                  side: WidgetStatePropertyAll(
-                    BorderSide(color: AppColors.borderSubtle),
-                  ),
-                ),
+                selected: {facade.source},
                 onSelectionChanged: (s) {
-                  setState(() => _source = s.first);
-                  if (_category == ItemCategory.game &&
-                      _source == MediaSource.anilist) {
-                    setState(() => _source = MediaSource.bangumi);
-                  }
-                  if (_searchController.text.isNotEmpty) {
-                    _search(_searchController.text);
+                  facadeN.setSource(s.first);
+                  if (_searchController.text.trim().isNotEmpty) {
+                    // facade already re-searches
                   }
                 },
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             SizedBox(
               height: 40,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   for (final c in ItemCategory.values) ...[
                     CategoryChip(
                       category: c,
-                      selected: _category == c,
+                      selected: facade.category == c,
                       onTap: () {
-                        setState(() {
-                          _category = c;
-                          _results = [];
-                        });
-                        if (c == ItemCategory.game &&
-                            _source == MediaSource.anilist) {
-                          return;
-                        }
-                        if (_searchController.text.isNotEmpty) {
-                          _search(_searchController.text);
-                        }
+                        facadeN.setCategory(c);
                       },
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                   ],
                 ],
               ),
             ),
             const SizedBox(height: 12),
-            if (!(_category == ItemCategory.game &&
-                _source == MediaSource.anilist))
+            if (!(facade.category == ItemCategory.game &&
+                facade.source == MediaSource.anilist))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextField(
                   controller: _searchController,
-                  onChanged: _onSearchChanged,
+                  onChanged: facadeN.onQueryChanged,
                   autofocus: true,
                   style: AppTypography.body,
                   decoration: InputDecoration(
-                    hintText: '搜尋 ${_category.label}...',
+                    hintText: '搜尋 ${facade.category.label}...',
                     hintStyle: AppTypography.body.copyWith(
                       color: AppColors.inkMuted,
                     ),
@@ -285,20 +169,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
-                        color: _category.color,
+                        color: facade.category.color,
                         width: 1.5,
                       ),
                     ),
                   ),
                 ),
               ),
-            if (_convertedQuery != null)
+            if (facade.convertedQuery != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '已轉簡體搜尋：$_convertedQuery',
+                    '已轉簡體搜尋：${facade.convertedQuery}',
                     style: AppTypography.micro.copyWith(
                       color: AppColors.inkMuted,
                     ),
@@ -306,15 +190,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ),
               ),
             const SizedBox(height: 16),
-            Expanded(child: _buildContent()),
+            Expanded(child: _buildContent(facade, facadeN)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContent() {
-    if (_category == ItemCategory.game && _source == MediaSource.anilist) {
+  Widget _buildContent(SearchFacadeState facade, SearchFacade facadeN) {
+    if (facade.category == ItemCategory.game &&
+        facade.source == MediaSource.anilist) {
       return SearchEmptyPanel(
         icon: Icons.sports_esports_outlined,
         title: 'AniList 不支援遊戲',
@@ -323,7 +208,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         onAction: () => context.push('/manual-entry'),
       );
     }
-    if (_loading) return _shimmerList();
+    if (facade.loading) return _shimmerList();
     if (_searchController.text.trim().isEmpty) {
       return const SearchEmptyPanel(
         icon: Icons.search,
@@ -331,28 +216,28 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         subtitle: '可連續新增，不會自動返回主頁',
       );
     }
-    if (_results.isEmpty) {
+    if (facade.results.isEmpty) {
       return SearchEmptyPanel(
         icon: Icons.inbox_outlined,
         title: '沒有結果',
-        subtitle: '試試其他關鍵字，或手動建立',
+        subtitle: facade.error ?? '試試其他關鍵字，或手動建立',
         actionLabel: '手動建立',
         onAction: () => context.push('/manual-entry'),
       );
     }
+    final s2t = ref.read(goalSettingsStoreProvider).titleSimpToTrad;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      itemCount: _results.length,
+      itemCount: facade.results.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (_, i) {
-        final r = _results[i];
-        final inList = _isInList(r);
-        final s2t = ref.read(goalSettingsStoreProvider).titleSimpToTrad;
+        final r = facade.results[i];
+        final inList = facadeN.isInLibrary(r);
         return SearchResultTile(
           title: displayTitle(r.displayName, simpToTrad: s2t),
           posterUrl: r.posterUrl,
-          typeKey: _typeKeyFor(r),
-          metaLine: _metaLine(r),
+          typeKey: r.categoryHint.storageKey,
+          metaLine: r.metaLine(),
           inList: inList,
           onAdd: inList ? null : () => _addItem(r),
         );
@@ -367,8 +252,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       itemBuilder: (_, _) => const Padding(
         padding: EdgeInsets.only(bottom: 12),
         child: ShimmerPlaceholder(
-          height: 100,
           width: double.infinity,
+          height: 96,
           borderRadius: 16,
         ),
       ),

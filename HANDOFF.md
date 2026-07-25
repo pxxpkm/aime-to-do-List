@@ -1,6 +1,6 @@
 ﻿# HANDOFF.md — ACG To-Do（給下一個零上下文會話）
 
-> **最後更新**：2026-07-25（Phase B1+B2：Hero 導覽 + 接下來強化 + gacha 放大）  
+> **最後更新**：2026-07-26（Deploy A+B：Cloudflare Pages + /proxy Function）  
 > **專案路徑**：`C:\todo\acg_todo\` · **Git root**：`C:\todo`  
 > **Flutter**：3.x · Dart 3.x · 以 **Flutter Web** 為主  
 > **文件優先**：本 HANDOFF + `lib/` 真相；`AGENTS.md` 有過時（舊 dark/Supabase 全量）部分
@@ -78,8 +78,8 @@
 - 點 pill → bottom sheet（完整目標 + **重設今日**）  
 - **海報導覽**：箭嘴 / 水平滑動 / 鍵盤 ←→ 在 `buildHeroPool` 循環；**只改 session**，不寫 pinTier  
 - **固定鈕**：主頁 CTA「固定/已固定」→ `pinHomeHero` / 改回 `daily`；長按海報 → 全螢幕  
-- 抽海報：彈窗、**不改 pinTier/進度**；2:3 高度優先、桌面寬可至 **~640**；可「設為主頁海報」  
-- **接下來**：strip 寬 128、高 220；`久未動`（staleDays）+ 期限 risk 邊框/左色條；`continue_item_badges.dart`  
+- 抽海報：彈窗、**不改 pinTier/進度**；2:3 高度優先、桌面寬可至 **~640**；結果態 **chrome≈220 + 海報下 28px 間距**（按鈕不壓住海報，無 scale>1 溢出）；可「設為主頁海報」  
+- **接下來**：strip 寬 128、高 220；底標題一行 + 進度；`久未動`（staleDays）+ 期限 risk 邊框/左色條；`continue_item_badges.dart`  
 - 目標重設：`GoalSettingsStore.setTodayProgress(0)`，**只清今日**，確認 dialog  
 - 純函式：`home_hero_pool.dart`、`continue_item_badges.dart`  
 
@@ -100,6 +100,8 @@
 - 排序：`HomeSortMode` + **升序/降序**（`homeSortAscending`；手動模式除外）  
 - 欄數：`home_layout.dart` 的 minCardWidth（畫廊/標準/緊湊）  
 - 圓角較小（poster ~8）  
+- **海報裁切**：設定 `poster_image_fit` = `cover`（預設）| `contain`（完整顯示，不裁臉）；**僅庫牆**  
+- **快捷鍵（本頁）**：`/` 開搜尋 · `Esc` 關搜尋/退出多選 · `Ctrl/⌘+A` 多選時全選目前篩選結果  
 
 ### 2.4b 統計
 - `stats_page.dart`：庫存 summary + **目標進度**（今日/滾動/月/年）+ 重設  
@@ -122,9 +124,19 @@
   - goals：`GoalSettingsStore.hive` / `.server`  
 
 ### 2.6 備份 / 遷移
-- 匯出匯入 JSON：設定 → 資料  
+- 匯出匯入 JSON：設定 → 資料；匯出會記 `last_backup_at`（≥14 天副標提示再匯出）  
 - Hive→磁碟：server 模式「上傳瀏覽器資料到磁碟庫」  
 - `library_backup_service.dart` merge 規則（id / anilist / bgm、進度 max）  
+- **強制重新載入**（Web）：設定 → 關於 → 清 SW/Cache + reload（`web_hard_reload.dart`）  
+- **StorageModeBanner**：Hive 降級時「重試連線」probe `/api/health` 成功則硬重載；「說明」dialog  
+
+### 2.6b Bangumi token
+- 預設 **Hive only**  
+- 磁碟庫模式可 opt-in「Token 存到磁碟庫」→ `settings.bundle.bangumi_auth`  
+- `BangumiTokenStore(libraryStore: serverStore?)`  
+
+### 2.6c Hero 預載
+- 切換主頁海報時 `precacheImage` 左右鄰（Web 走 `toProxyUrl`）  
 
 ### 2.7 UI 主題
 - Paper light：`app_colors.dart`, `app_theme.dart`, `app_typography.dart`（Noto TC，字重已加粗）  
@@ -139,7 +151,7 @@
 | **Git commit** | 里程碑已 commit（paper + shell + sqlite + home/detail + collection + notif） |
 | **收藏頁** | ✅ 資料夾網格 → `/library?folder=` |
 | **S3.3 通知上 SQLite** | ✅ 事件表 + prefs 進 settings.bundle；Hive 可遷移 |
-| **S3.4 Bangumi token 上磁碟** | 未做（預設應 opt-in） |
+| **S3.4 Bangumi token 上磁碟** | ✅ opt-in（設定「Token 存到磁碟庫」→ settings.bangumi_auth） |
 | **主頁 pin 雙欄 board** | **有意拿掉**（改 chip + 接下來）；若用戶要回雙欄需還原 |
 | **AGENTS.md** | 仍寫 dark / 全量 Supabase，勿當真相 |
 | **工作區是否已 `flutter build web`** | 改 UI 後若走 8080 **必須 rebuild** 才看得到 |
@@ -163,8 +175,11 @@
 2. ~~S3.3 通知進 SQLite~~ ✅  
 3. 媒體庫細節（fit contain 選項等） / Bangumi token 上磁碟（opt-in）  
 
-### 優先建議 C — 架構（Reina 對照，非急）
-- Metadata adapter 註冊表、ItemsNotifier 增量 patch  
+### 優先建議 C — 架構（Reina 對照）
+- ✅ Metadata adapter 註冊表（`SourceRegistry` / `SourceCandidate`）  
+- ✅ ItemsNotifier 增量 patch（單筆 mutation）  
+- ✅ SearchFacade 薄化搜尋頁  
+- ✅ AGENTS.md 對齊現況（paper + SQLite + adapters）  
 
 ---
 
@@ -207,7 +222,20 @@ flutter build web
 python proxy_server.py
 # smoke API（proxy 已開）：
 powershell -NoProfile -File scripts/smoke_api.ps1
+
+# Cloudflare Pages（靜態 + functions/proxy）：
+flutter build web --release --base-href /
+npx wrangler pages deploy build/web --project-name=acg-todo
+# 詳見 docs/deploy-cloudflare.md
 ```
+
+### 6b. 公網 vs 本機
+| | 本機 8080 | Cloudflare Pages |
+|--|-----------|------------------|
+| UI | build/web | 同左 |
+| 庫 | SQLite library.db | 瀏覽器 Hive（清站會丟；請匯出備份） |
+| 圖代理 | proxy_server `/proxy` | Pages Function `functions/proxy.js`（僅 *.bgm.tv） |
+| Flutter proxy base | `Uri.base.origin/proxy?url=` | 同左（同源） |
 
 ---
 
@@ -224,6 +252,7 @@ powershell -NoProfile -File scripts/smoke_api.ps1
 | 媒體庫 | `lib/presentation/pages/library_page.dart` |
 | Hero / 抽卡 | `home_hero_stage.dart`, `poster_gacha_dialog.dart`, `home/home_hero_pool.dart` |
 | 接下來徽章 | `continue_strip.dart`, `home/continue_item_badges.dart` |
+| 搜尋 adapter | `data/metadata/*`, `sourceRegistryProvider`, `search_facade.dart` |
 | 目標卡 | `home_goal_card.dart` |
 | 海報卡 | `poster_card.dart`（density: magazine/strip/**poster**） |
 | 欄數 | `presentation/home/home_layout.dart` |

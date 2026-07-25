@@ -15,6 +15,7 @@ import 'package:acg_todo/presentation/providers/folders_provider.dart';
 import 'package:acg_todo/presentation/providers/items_provider.dart';
 import 'package:acg_todo/presentation/providers/notification_providers.dart';
 import 'package:acg_todo/presentation/providers/repository_providers.dart';
+import 'package:acg_todo/core/utils/web_hard_reload.dart';
 import 'package:acg_todo/presentation/widgets/backup_import_sheet.dart';
 import 'package:acg_todo/presentation/widgets/hive_to_server_migrate_sheet.dart';
 import 'package:acg_todo/presentation/widgets/storage_mode_banner.dart';
@@ -43,10 +44,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     await ref.read(bangumiNotifierProvider.notifier).verifyAndSaveToken(token);
   }
 
+  String _backupSubtitle() {
+    final store = ref.read(goalSettingsStoreProvider);
+    final backend = ref.read(libraryBackendInfoProvider);
+    final hiveHint = backend.isServer
+        ? ''
+        : ' · 瀏覽器庫請常備份';
+    final at = store.lastBackupAt;
+    if (at == null) {
+      return '下載 JSON（作品、資料夾、目標進度）· 尚未匯出$hiveHint';
+    }
+    final local = at.toLocal();
+    final stamp =
+        '${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+    final days = DateTime.now().difference(at).inDays;
+    final stale = days >= 14 ? ' · 建議再匯出' : '';
+    return '上次 $stamp$stale$hiveHint';
+  }
+
   @override
   Widget build(BuildContext context) {
     final bangumiState = ref.watch(bangumiNotifierProvider);
     final backend = ref.watch(libraryBackendInfoProvider);
+    ref.watch(dailyGoalTickProvider);
+    final tokenStore = ref.watch(bangumiTokenStoreProvider);
 
     return AppScaffold(
       body: SafeArea(
@@ -102,7 +124,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         child: ListTile(
                           leading:
                               const Icon(Icons.check_circle, color: AppColors.success),
-                          title: Text('已連結�?{bangumiState.username ?? ""}'),
+                          title: Text('已連結：${bangumiState.username ?? ""}'),
                           subtitle: const Text('點擊取消連結',
                               style: TextStyle(
                                   color: AppColors.textMuted, fontSize: 12)),
@@ -111,6 +133,44 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               .clearToken(),
                         ),
                       ),
+                      if (tokenStore.canPersistToDisk) ...[
+                        const SizedBox(height: 8),
+                        Material(
+                          color: AppColors.paperElevated,
+                          borderRadius: BorderRadius.circular(12),
+                          child: SwitchListTile(
+                            secondary: const Icon(
+                              Icons.save_outlined,
+                              color: AppColors.manga,
+                            ),
+                            title: const Text('Token 存到磁碟庫'),
+                            subtitle: Text(
+                              tokenStore.persistToDisk
+                                  ? '已寫入 library.db 設定（清瀏覽器仍保留）'
+                                  : '預設只在瀏覽器；開啟後一併寫入磁碟（opt-in）',
+                              style: const TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 12,
+                              ),
+                            ),
+                            value: tokenStore.persistToDisk,
+                            onChanged: (v) async {
+                              await tokenStore.setPersistToDisk(v);
+                              ref.read(dailyGoalTickProvider.notifier).state++;
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    v ? '已將 Token 存到磁碟庫' : '已改回僅瀏覽器儲存',
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Material(
                         color: AppColors.paperElevated,
@@ -119,7 +179,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           leading:
                               const Icon(Icons.download, color: AppColors.game),
                           title: const Text('匯入我的收藏列表'),
-                          subtitle: const Text('�?Bangumi 匯入你的想看/在看/看過',
+                          subtitle: const Text('從 Bangumi 匯入你的想看/在看/看過',
                               style: TextStyle(
                                   color: AppColors.textMuted, fontSize: 12)),
                           onTap: () => context.push('/import-collection'),
@@ -262,7 +322,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     ],
                     _SettingTile(
                       title: '匯出備份',
-                      subtitle: '下載 JSON（作品、資料夾、目標進度）',
+                      subtitle: _backupSubtitle(),
                       icon: Icons.download_outlined,
                       onTap: () => exportLibraryBackup(ref, context),
                     ),
@@ -339,6 +399,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       icon: Icons.info_outlined,
                       onTap: () {},
                     ),
+                    if (kIsWeb) ...[
+                      const SizedBox(height: 8),
+                      _SettingTile(
+                        title: '強制重新載入',
+                        subtitle: '清除 Service Worker / 快取後重整（改 UI 後若仍見舊版）',
+                        icon: Icons.refresh,
+                        onTap: () async {
+                          final ok = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('強制重新載入？'),
+                              content: const Text(
+                                '會取消註冊 Service Worker、清 Cache Storage，'
+                                '然後重新整理頁面。本機作品資料不會因此刪除。',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('取消'),
+                                ),
+                                FilledButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: const Text('重新載入'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (ok == true) await hardReloadApp();
+                        },
+                      ),
+                    ],
 
                     const SizedBox(height: 40),
                   ],
@@ -618,6 +709,31 @@ class _HomeDensitySetting extends ConsumerWidget {
                 await store.setHomeGridDensity(s.first);
                 ref.read(dailyGoalTickProvider.notifier).state++;
               },
+            ),
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Icon(Icons.crop_free, color: AppColors.manga, size: 20),
+                SizedBox(width: 8),
+                Text('媒體庫海報裁切', style: TextStyle(fontWeight: FontWeight.w600)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'cover', label: Text('填滿裁切')),
+                ButtonSegment(value: 'contain', label: Text('完整顯示')),
+              ],
+              selected: {store.posterImageFit},
+              onSelectionChanged: (s) async {
+                await store.setPosterImageFit(s.first);
+                ref.read(dailyGoalTickProvider.notifier).state++;
+              },
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '僅影響媒體庫海報牆。主頁大海報 / 抽海報維持填滿。',
+              style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
             ),
             const SizedBox(height: 16),
             const Row(

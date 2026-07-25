@@ -2,6 +2,9 @@ import 'package:acg_todo/data/local/bangumi_token_store.dart';
 import 'package:acg_todo/data/local/goal_settings_store.dart';
 import 'package:acg_todo/data/local/hive_cache.dart';
 import 'package:acg_todo/data/local/library_store.dart';
+import 'package:acg_todo/data/metadata/adapters/anilist_adapter.dart';
+import 'package:acg_todo/data/metadata/adapters/bangumi_adapter.dart';
+import 'package:acg_todo/data/metadata/source_registry.dart';
 import 'package:acg_todo/data/repositories/anilist/anilist_client.dart';
 import 'package:acg_todo/data/repositories/bangumi/bangumi_client.dart';
 import 'package:acg_todo/data/repositories/folders_repository.dart';
@@ -17,6 +20,14 @@ final aniListClientProvider = Provider<AniListClient>((ref) {
 
 final bangumiClientProvider = Provider<BangumiClient>((ref) {
   return BangumiClient();
+});
+
+/// Metadata search adapters (Bangumi / AniList). Add new sources here only.
+final sourceRegistryProvider = Provider<SourceRegistry>((ref) {
+  return SourceRegistry([
+    BangumiAdapter(ref.watch(bangumiClientProvider)),
+    AniListAdapter(ref.watch(aniListClientProvider)),
+  ]);
 });
 
 /// Overridden in main (hive or server). Fallback for tests without override.
@@ -39,7 +50,12 @@ final foldersRepositoryProvider = Provider<FoldersRepository>((ref) {
 
 final bangumiTokenStoreProvider = Provider<BangumiTokenStore>((ref) {
   final cache = ref.watch(hiveCacheProvider);
-  return BangumiTokenStore(cache.settingsBox);
+  final library = ref.watch(libraryStoreProvider);
+  return BangumiTokenStore(
+    cache.settingsBox,
+    libraryStore:
+        library.backendId == LibraryBackendIds.server ? library : null,
+  );
 });
 
 final libraryBackupRepositoryProvider = Provider<LibraryBackupRepository>((ref) {

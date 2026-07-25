@@ -6,7 +6,7 @@ part of 'items_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$searchMediaHash() => r'359108cf22b06ee682c98507f949b4b3fe8170eb';
+String _$searchMediaHash() => r'9b45869febc558d3e513a1c3fdcf4137207244ea';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,7 +34,7 @@ class _SystemHash {
 const searchMediaProvider = SearchMediaFamily();
 
 /// See also [searchMedia].
-class SearchMediaFamily extends Family<AsyncValue<List<BangumiSearchResult>>> {
+class SearchMediaFamily extends Family<AsyncValue<List<SourceCandidate>>> {
   /// See also [searchMedia].
   const SearchMediaFamily();
 
@@ -71,7 +71,7 @@ class SearchMediaFamily extends Family<AsyncValue<List<BangumiSearchResult>>> {
 
 /// See also [searchMedia].
 class SearchMediaProvider
-    extends AutoDisposeFutureProvider<List<BangumiSearchResult>> {
+    extends AutoDisposeFutureProvider<List<SourceCandidate>> {
   /// See also [searchMedia].
   SearchMediaProvider(String query, ItemCategory category, MediaSource source)
     : this._internal(
@@ -106,8 +106,7 @@ class SearchMediaProvider
 
   @override
   Override overrideWith(
-    FutureOr<List<BangumiSearchResult>> Function(SearchMediaRef provider)
-    create,
+    FutureOr<List<SourceCandidate>> Function(SearchMediaRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -126,7 +125,7 @@ class SearchMediaProvider
   }
 
   @override
-  AutoDisposeFutureProviderElement<List<BangumiSearchResult>> createElement() {
+  AutoDisposeFutureProviderElement<List<SourceCandidate>> createElement() {
     return _SearchMediaProviderElement(this);
   }
 
@@ -151,8 +150,7 @@ class SearchMediaProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SearchMediaRef
-    on AutoDisposeFutureProviderRef<List<BangumiSearchResult>> {
+mixin SearchMediaRef on AutoDisposeFutureProviderRef<List<SourceCandidate>> {
   /// The parameter `query` of this provider.
   String get query;
 
@@ -164,7 +162,7 @@ mixin SearchMediaRef
 }
 
 class _SearchMediaProviderElement
-    extends AutoDisposeFutureProviderElement<List<BangumiSearchResult>>
+    extends AutoDisposeFutureProviderElement<List<SourceCandidate>>
     with SearchMediaRef {
   _SearchMediaProviderElement(super.provider);
 
@@ -176,7 +174,7 @@ class _SearchMediaProviderElement
   MediaSource get source => (origin as SearchMediaProvider).source;
 }
 
-String _$itemsNotifierHash() => r'3a59703e80038f97a206bf6bf31cf2b7efa6e0dc';
+String _$itemsNotifierHash() => r'd3ddc85791c64acb79825d763274061f88619c13';
 
 /// See also [ItemsNotifier].
 @ProviderFor(ItemsNotifier)

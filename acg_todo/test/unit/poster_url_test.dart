@@ -114,16 +114,28 @@ void main() {
   });
 
   group('toProxyUrl', () {
-    test('wraps lain.bgm.tv through local proxy', () {
+    test('wraps lain.bgm.tv through proxy base', () {
       const src = 'https://lain.bgm.tv/pic/cover/c/ab/cd.jpg';
-      final out = toProxyUrl(src);
+      final out = toProxyUrl(src, proxyBase: kLocalPosterProxyBase);
       expect(out.startsWith(kLocalPosterProxyBase), isTrue);
       expect(out, contains(Uri.encodeComponent(src)));
     });
 
     test('wraps other bgm.tv hosts', () {
       const src = 'https://api.bgm.tv/v0/subjects/1/image';
-      expect(toProxyUrl(src), '$kLocalPosterProxyBase${Uri.encodeComponent(src)}');
+      expect(
+        toProxyUrl(src, proxyBase: kLocalPosterProxyBase),
+        '$kLocalPosterProxyBase${Uri.encodeComponent(src)}',
+      );
+    });
+
+    test('same-origin style base for cloud deploy', () {
+      const src = 'https://lain.bgm.tv/pic/cover/l/x.jpg';
+      const base = 'https://todo.example.com/proxy?url=';
+      expect(
+        toProxyUrl(src, proxyBase: base),
+        '$base${Uri.encodeComponent(src)}',
+      );
     });
 
     test('leaves data URLs unchanged', () {
@@ -138,7 +150,7 @@ void main() {
 
     test('does not double-wrap proxy URLs', () {
       const src = 'https://lain.bgm.tv/pic/cover/c/ab/cd.jpg';
-      final once = toProxyUrl(src);
+      final once = toProxyUrl(src, proxyBase: kLocalPosterProxyBase);
       expect(toProxyUrl(once), once);
     });
   });

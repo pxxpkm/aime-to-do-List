@@ -151,9 +151,6 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
       _remarkItemId = item.id;
       _remarkController.text = item.remark ?? '';
     }
-    // Item detail is full-screen; viewport width is fine for CTA placement.
-    final useWideChrome = MediaQuery.sizeOf(context).width >= 900;
-
     return AppScaffold(
       body: SafeArea(
         child: Stack(
@@ -164,8 +161,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final wide = useWideDetailLayout(constraints);
-                      if (wide) {
+                      if (useWideDetailLayout(constraints)) {
                         return _buildWideBody(
                           item: item,
                           color: color,
@@ -176,7 +172,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
                           constraints: constraints,
                         );
                       }
-                      return _buildNarrowBody(
+                      return _buildVerticalBody(
                         item: item,
                         color: color,
                         displayValue: displayValue,
@@ -210,7 +206,8 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
           ],
         ),
       ),
-      bottomNavigationBar: useWideChrome
+      // Wide: complete CTA lives in the side panel; narrow: bottom bar.
+      bottomNavigationBar: MediaQuery.sizeOf(context).width >= 900
           ? null
           : _buildBottomBar(
               item: item,
@@ -269,6 +266,7 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
     );
   }
 
+  /// Wide 16:9: poster fills height (top-aligned), info panel max ~460.
   Widget _buildWideBody({
     required Item item,
     required Color color,
@@ -278,63 +276,80 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
     required bool isComplete,
     required BoxConstraints constraints,
   }) {
-    final posterColW = widePosterColumnWidth(constraints.maxWidth);
-    final size = widePosterSize(
-      columnWidth: posterColW - 20,
-      availableHeight: constraints.maxHeight - 12,
+    const edge = 12.0;
+    final size = detailWidePosterSize(
+      availableWidth: constraints.maxWidth,
+      availableHeight: constraints.maxHeight - edge * 2,
     );
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          width: posterColW,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 6, 6, 8),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: _PosterPane(
-                item: item,
-                width: size.width,
-                height: size.height,
+    final posterCol = Padding(
+      padding: const EdgeInsets.fromLTRB(edge, edge, 8, edge),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: _PosterPane(
+          item: item,
+          width: size.width,
+          height: size.height,
+        ),
+      ),
+    );
+
+    final panel = SizedBox(
+      width: kDetailSidePanelMaxWidth,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, edge, edge, edge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildHeader(item, color),
+                  const SizedBox(height: 12),
+                  _buildProgress(
+                    item,
+                    color,
+                    displayValue,
+                    hasTotal,
+                    total,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoPanel(item, color),
+                ],
               ),
             ),
-          ),
+            const SizedBox(height: 10),
+            _buildCompleteButton(
+              item: item,
+              color: color,
+              hasTotal: hasTotal,
+              total: total,
+              isComplete: isComplete,
+            ),
+          ],
         ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(6, 6, 16, 12),
-                  children: [
-                    _buildHeader(item, color),
-                    const SizedBox(height: 10),
-                    _buildProgress(item, color, displayValue, hasTotal, total),
-                    const SizedBox(height: 10),
-                    _buildInfoPanel(item, color, wide: true),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 16, 10),
-                child: _buildCompleteButton(
-                  item: item,
-                  color: color,
-                  hasTotal: hasTotal,
-                  total: total,
-                  isComplete: isComplete,
-                ),
-              ),
-            ],
-          ),
+      ),
+    );
+
+    // Center the poster + panel group so the page stays balanced on ultrawide.
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            posterCol,
+            panel,
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildNarrowBody({
+  /// Narrow: top poster + bottom info (max 720, centered).
+  Widget _buildVerticalBody({
     required Item item,
     required Color color,
     required double displayValue,
@@ -342,16 +357,28 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
     required int? total,
   }) {
     final media = MediaQuery.sizeOf(context);
-    final size = portraitPosterSize(
+    final size = detailHeroPosterSize(
       mediaWidth: media.width,
       mediaHeight: media.height,
     );
 
+    Widget content(Widget child) {
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: kDetailContentMaxWidth),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: child,
+          ),
+        ),
+      );
+    }
+
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 28),
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: Center(
             child: _PosterPane(
               item: item,
@@ -360,21 +387,14 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _buildHeader(item, color),
+        const SizedBox(height: 16),
+        content(_buildHeader(item, color)),
+        const SizedBox(height: 12),
+        content(
+          _buildProgress(item, color, displayValue, hasTotal, total),
         ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _buildProgress(item, color, displayValue, hasTotal, total),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _buildInfoPanel(item, color, wide: false),
-        ),
+        const SizedBox(height: 12),
+        content(_buildInfoPanel(item, color)),
       ],
     );
   }
@@ -610,8 +630,8 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
     );
   }
 
-  /// Merged about + manage; wide mode uses 2-column interior.
-  Widget _buildInfoPanel(Item item, Color color, {required bool wide}) {
+  /// Merged about + manage (single column under centered poster).
+  Widget _buildInfoPanel(Item item, Color color) {
     final folders = ref.watch(foldersNotifierProvider);
     final folderName = item.folderId == null
         ? '未分類'
@@ -619,7 +639,9 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
             '未分類');
     final deadlineLabel = item.deadline == null
         ? '未設定限期'
-        : '${app_date.DateUtils.formatDate(item.deadline!)} · ${app_date.DateUtils.formatCountdown(item.deadline!)}';
+        : '${app_date.DateUtils.formatDate(item.deadline!)} · '
+            '${app_date.DateUtils.formatCountdown(item.deadline!)} · '
+            '${_remindLabel(item)}';
     final hasSummary = item.summary != null && item.summary!.isNotEmpty;
 
     final summaryBlock = hasSummary
@@ -761,103 +783,28 @@ class _ItemDetailPageState extends ConsumerState<ItemDetailPage> {
       ],
     );
 
-    final manageList = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ListTile(
-          dense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-          visualDensity: VisualDensity.compact,
-          leading: Icon(Icons.folder_outlined, color: color, size: 22),
-          title: Text('資料夾 · $folderName', style: AppTypography.caption),
-          trailing: const Icon(
-            Icons.chevron_right,
-            size: 18,
-            color: AppColors.inkMuted,
-          ),
-          onTap: () => showMoveToFolderSheet(
-            context,
-            ref,
-            itemId: item.id,
-            currentFolderId: item.folderId,
-          ),
-        ),
-        ListTile(
-          dense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-          visualDensity: VisualDensity.compact,
-          leading: Icon(Icons.event_outlined, color: color, size: 22),
-          title: Text(deadlineLabel, style: AppTypography.caption),
-          subtitle: item.deadline != null
-              ? Text(
-                  _remindLabel(item),
-                  style:
-                      AppTypography.micro.copyWith(color: AppColors.inkMuted),
-                )
-              : null,
-          trailing: const Icon(
-            Icons.chevron_right,
-            size: 18,
-            color: AppColors.inkMuted,
-          ),
-          onTap: () => showDeadlineEditor(
-            context,
-            ref,
-            itemId: item.id,
-            currentDeadline: item.deadline,
-            remindMode: item.deadlineRemindMode,
-            customOffsets: item.customDeadlineOffsets,
-          ),
-        ),
-      ],
-    );
-
     return DetailPaperSection(
       title: '詳情',
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      child: wide
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                manageGrid,
-                if (datesFooter != null) datesFooter,
-                if (summaryBlock != null) ...[
-                  const SizedBox(height: 10),
-                  const Divider(height: 1, color: AppColors.divider),
-                  const SizedBox(height: 8),
-                  summaryBlock,
-                ],
-                const SizedBox(height: 10),
-                const Divider(height: 1, color: AppColors.divider),
-                const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: tagsBlock),
-                    const SizedBox(width: 12),
-                    Expanded(child: remarkBlock),
-                  ],
-                ),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (summaryBlock != null) ...[
-                  summaryBlock,
-                  const SizedBox(height: 8),
-                  const Divider(height: 1, color: AppColors.divider),
-                  const SizedBox(height: 8),
-                ],
-                tagsBlock,
-                const SizedBox(height: 10),
-                remarkBlock,
-                const SizedBox(height: 8),
-                const Divider(height: 1, color: AppColors.divider),
-                manageList,
-                if (datesFooter != null) datesFooter,
-              ],
-            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (summaryBlock != null) ...[
+            summaryBlock,
+            const SizedBox(height: 10),
+            const Divider(height: 1, color: AppColors.divider),
+            const SizedBox(height: 10),
+          ],
+          tagsBlock,
+          const SizedBox(height: 12),
+          remarkBlock,
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: AppColors.divider),
+          const SizedBox(height: 10),
+          manageGrid,
+          if (datesFooter != null) datesFooter,
+        ],
+      ),
     );
   }
 

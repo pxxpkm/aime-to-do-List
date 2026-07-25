@@ -1,6 +1,6 @@
 ﻿# HANDOFF.md — ACG To-Do（給下一個零上下文會話）
 
-> **最後更新**：2026-07-17（B2 通知上 SQLite）  
+> **最後更新**：2026-07-25（Phase B1+B2：Hero 導覽 + 接下來強化 + gacha 放大）  
 > **專案路徑**：`C:\todo\acg_todo\` · **Git root**：`C:\todo`  
 > **Flutter**：3.x · Dart 3.x · 以 **Flutter Web** 為主  
 > **文件優先**：本 HANDOFF + `lib/` 真相；`AGENTS.md` 有過時（舊 dark/Supabase 全量）部分
@@ -72,30 +72,39 @@
   - `lib/presentation/widgets/continue_strip.dart`  
 - 結構：
   1. **沉浸大海報**（2:3；近全寬；高約可用區 92%；**無 400 寬上限**）  
-  2. 圖上疊：左上 **今日進度 pill**、右上通知、底標題/進度、**抽海報 / 開啟 / +1**  
+  2. 圖上疊：左上 **今日進度 pill**、右上通知、**左右箭嘴**切換海報池、底標題/進度（含 `n/m`）、**抽海報 / 開啟 / +1**  
   3. **接下來** 橫滑（最近進度 + 補 pin）；pin chip → `/pin/...`  
   4. **沒有** 獨立「今日進度」大卡、沒有雙欄 pin 板  
 - 點 pill → bottom sheet（完整目標 + **重設今日**）  
-- 抽海報：彈窗、**不改 pinTier/進度**；可「設為主頁海報」只寫 settings  
+- **海報導覽**：箭嘴 / 水平滑動 / 鍵盤 ←→ 在 `buildHeroPool` 循環；**只改 session**，不寫 pinTier  
+- **固定鈕**：主頁 CTA「固定/已固定」→ `pinHomeHero` / 改回 `daily`；長按海報 → 全螢幕  
+- 抽海報：彈窗、**不改 pinTier/進度**；2:3 高度優先、桌面寬可至 **~640**；可「設為主頁海報」  
+- **接下來**：strip 寬 128、高 220；`久未動`（staleDays）+ 期限 risk 邊框/左色條；`continue_item_badges.dart`  
 - 目標重設：`GoalSettingsStore.setTodayProgress(0)`，**只清今日**，確認 dialog  
+- 純函式：`home_hero_pool.dart`、`continue_item_badges.dart`  
 
 ### 2.3 項目詳情（ItemDetail）
-- `lib/presentation/pages/item_detail_page.dart`  
-- `detail_layout.dart`：`width ≥ 900` → **左大海報 + 右資訊欄**  
-  - 海報欄寬：`widePosterColumnWidth`（900–1100 ~37%/360；1100–1400 ~33%/400；>1400 固定 420）  
-- 窄：放大海報（~55% 屏高 cap，max 寬 ~420）  
-- **進度卡橫排**（`DetailProgressCard`，寬≥340）：環+數字+滑桿+±；書籤/上次進度  
-- **Header chips**：類型、狀態(短按循環/長按選單)、釘選(同上)、來源、日期、連結、評分  
-- **詳情紙卡**：寬＝管理 2 小卡 grid → 簡介 → 標籤|備註；窄＝單欄  
-- **完成鈕**：寬＝右欄 sticky；窄＝底欄  
-- **編輯入口**：只 AppBar「編輯」→ `showItemEditorSheet`  
+- `lib/presentation/pages/item_detail_page.dart` + `detail_layout.dart`  
+- **寬 ≥900（16:9）左右分割**：  
+  - 左海報：`detailWidePosterSize` — **高度優先**吃滿可用高，2:3  
+  - 右資訊：`maxWidth: 460`，**頂對齊**，不拉滿剩餘寬  
+  - 整組 `Row` 水平置中；完成鈕在右欄底 sticky  
+- **窄：上下分割** — `detailHeroPosterSize` + 資訊 `maxWidth: 720` 居中 + 底欄完成  
+- **進度卡橫排**；Header chips；詳情紙卡（簡介/標籤/備註/管理 grid）  
+- **編輯入口**：只 AppBar「編輯」  
 - 簡介可折疊（預設 3 行）  
 
 ### 2.4 媒體庫
 - `lib/presentation/pages/library_page.dart`  
 - `PosterCardDensity.poster`（全圖 + 底漸層字）  
+- 排序：`HomeSortMode` + **升序/降序**（`homeSortAscending`；手動模式除外）  
 - 欄數：`home_layout.dart` 的 minCardWidth（畫廊/標準/緊湊）  
 - 圓角較小（poster ~8）  
+
+### 2.4b 統計
+- `stats_page.dart`：庫存 summary + **目標進度**（今日/滾動/月/年）+ 重設  
+- 重設只清 `progressDays` 累計，**不改作品集數**  
+- 近 14 日 bar 用真實 day buckets  
 
 ### 2.5 本機 SQLite API
 - 入口：`python proxy_server.py`（`acg_todo/proxy_server.py`）  
@@ -213,7 +222,8 @@ powershell -NoProfile -File scripts/smoke_api.ps1
 | 詳情 | `item_detail_page.dart` + `item_detail/detail_layout.dart` |
 | 收藏 | `collection_page.dart` → `library?folder=` |
 | 媒體庫 | `lib/presentation/pages/library_page.dart` |
-| Hero / 抽卡 | `home_hero_stage.dart`, `poster_gacha_dialog.dart` |
+| Hero / 抽卡 | `home_hero_stage.dart`, `poster_gacha_dialog.dart`, `home/home_hero_pool.dart` |
+| 接下來徽章 | `continue_strip.dart`, `home/continue_item_badges.dart` |
 | 目標卡 | `home_goal_card.dart` |
 | 海報卡 | `poster_card.dart`（density: magazine/strip/**poster**） |
 | 欄數 | `presentation/home/home_layout.dart` |

@@ -88,10 +88,15 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     super.dispose();
   }
 
-  List<Item> _filterItems(List<Item> items, HomeSortMode sortMode) {
+  List<Item> _filterItems(
+    List<Item> items,
+    HomeSortMode sortMode, {
+    bool sortAscending = false,
+  }) {
     return filterAndSortHomeItems(
       items: items,
       sortMode: sortMode,
+      sortAscending: sortAscending,
       typeKey: _typeFilter?.storageKey,
       folderFilter: _folderFilter,
       tagFilter: _tagFilter,
@@ -476,6 +481,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     setState(() {});
   }
 
+  Future<void> _setSortAscending(bool ascending) async {
+    await ref.read(goalSettingsStoreProvider).setHomeSortAscending(ascending);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = ref.watch(itemsNotifierProvider);
@@ -484,8 +494,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final store = ref.watch(goalSettingsStoreProvider);
     final density = store.homeGridDensity;
     final sortMode = store.homeSortMode;
+    final sortAscending = store.homeSortAscending;
     final layout = homeGridLayout(density);
-    final filtered = _filterItems(items, sortMode);
+    final filtered = _filterItems(
+      items,
+      sortMode,
+      sortAscending: sortAscending,
+    );
     // Library shows all filtered items (pins included; board lives on dashboard).
     final gridItems = filtered;
     final allTags = ref.read(itemsRepositoryProvider).allTags();
@@ -557,37 +572,67 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                           return;
                         }
                         switch (value) {
+                          case 'dir:asc':
+                            _setSortAscending(true);
+                          case 'dir:desc':
+                            _setSortAscending(false);
                           case 'select':
                             setState(() => _selectionMode = true);
                           case 'stats':
                             context.push('/stats');
                         }
                       },
-                      itemBuilder: (ctx) => [
-                        PopupMenuItem(
-                          enabled: false,
-                          child: Text(
-                            '排序 · ${sortMode.label}',
-                            style: AppTypography.micro,
-                          ),
-                        ),
-                        for (final m in HomeSortMode.values)
+                      itemBuilder: (ctx) {
+                        final dirLabel = sortMode == HomeSortMode.manual
+                            ? '手動'
+                            : (sortAscending ? '升序' : '降序');
+                        return [
                           PopupMenuItem(
-                            value: 'sort:${m.name}',
+                            enabled: false,
                             child: Text(
-                              m == sortMode ? '✓ ${m.label}' : m.label,
+                              '排序 · ${sortMode.label} · $dirLabel',
+                              style: AppTypography.micro,
                             ),
                           ),
-                        const PopupMenuDivider(),
-                        const PopupMenuItem(
-                          value: 'select',
-                          child: Text('選擇'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'stats',
-                          child: Text('統計'),
-                        ),
-                      ],
+                          for (final m in HomeSortMode.values)
+                            PopupMenuItem(
+                              value: 'sort:${m.name}',
+                              child: Text(
+                                m == sortMode ? '✓ ${m.label}' : m.label,
+                              ),
+                            ),
+                          const PopupMenuDivider(),
+                          PopupMenuItem(
+                            value: 'dir:desc',
+                            enabled: sortMode != HomeSortMode.manual,
+                            child: Text(
+                              !sortAscending &&
+                                      sortMode != HomeSortMode.manual
+                                  ? '✓ 降序'
+                                  : '降序',
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'dir:asc',
+                            enabled: sortMode != HomeSortMode.manual,
+                            child: Text(
+                              sortAscending &&
+                                      sortMode != HomeSortMode.manual
+                                  ? '✓ 升序'
+                                  : '升序',
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+                          const PopupMenuItem(
+                            value: 'select',
+                            child: Text('選擇'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'stats',
+                            child: Text('統計'),
+                          ),
+                        ];
+                      },
                     ),
                   ],
                 ],

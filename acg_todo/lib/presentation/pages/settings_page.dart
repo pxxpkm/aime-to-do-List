@@ -642,7 +642,7 @@ class _HomeDensitySetting extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              '固定：用抽海報結果「設為主頁海報」。抽卡不影響正在追/優先追。',
+              '固定：主頁海報「固定」鈕或抽海報「設為主頁海報」。箭嘴/滑動只瀏覽，不改釘選。',
               style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
             ),
           ],

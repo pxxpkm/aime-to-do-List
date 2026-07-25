@@ -78,4 +78,25 @@ void main() {
     ], HomeSortMode.title);
     expect(list.map((e) => e.id), ['2', '1']);
   });
+
+  test('title ascending flips to Z first when ascending true', () {
+    final desc = sorter.sort([
+      _item(id: '1', title: 'zeta'),
+      _item(id: '2', title: 'Alpha'),
+    ], HomeSortMode.title);
+    final asc = sorter.sort([
+      _item(id: '1', title: 'zeta'),
+      _item(id: '2', title: 'Alpha'),
+    ], HomeSortMode.title, ascending: true);
+    expect(desc.map((e) => e.id), ['2', '1']);
+    expect(asc.map((e) => e.id), ['1', '2']);
+  });
+
+  test('manual ignores ascending flag', () {
+    final list = sorter.sort([
+      _item(id: 'b', sortOrder: 2),
+      _item(id: 'a', sortOrder: 0),
+    ], HomeSortMode.manual, ascending: true);
+    expect(list.map((e) => e.id), ['a', 'b']);
+  });
 }

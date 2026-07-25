@@ -8,6 +8,7 @@ import 'package:acg_todo/core/utils/item_display.dart';
 import 'package:acg_todo/core/utils/score_utils.dart';
 import 'package:acg_todo/domain/entities/item.dart';
 import 'package:acg_todo/domain/entities/pin_tier.dart';
+import 'package:acg_todo/presentation/home/continue_item_badges.dart';
 import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
 import 'package:acg_todo/presentation/providers/repository_providers.dart';
 import 'package:acg_todo/presentation/widgets/deadline_badge.dart';
@@ -42,6 +43,12 @@ class PosterCard extends ConsumerStatefulWidget {
   /// null → read [GoalSettingsStore.titleSimpToTrad]; set in tests to avoid Hive.
   final bool? titleSimpToTrad;
 
+  /// Strip: show「久未動」pill (caller decides via [ContinueItemBadges]).
+  final bool showStale;
+
+  /// Strip: left accent for deadline risk (null = none).
+  final ContinueRisk? continueRisk;
+
   const PosterCard({
     super.key,
     required this.item,
@@ -54,6 +61,8 @@ class PosterCard extends ConsumerStatefulWidget {
     this.heroTag,
     this.density = PosterCardDensity.magazine,
     this.titleSimpToTrad,
+    this.showStale = false,
+    this.continueRisk,
   });
 
   @override
@@ -104,6 +113,18 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             ? 8.0
             : 12.0;
 
+    final riskColor = switch (widget.continueRisk) {
+      ContinueRisk.overdue => AppColors.danger,
+      ContinueRisk.atRisk => AppColors.warning,
+      null => null,
+    };
+    final borderColor = widget.selected
+        ? AppColors.anime
+        : (riskColor ?? AppColors.borderSubtle);
+    final borderWidth = widget.selected
+        ? 2.0
+        : (riskColor != null ? 1.5 : 1.0);
+
     return AnimatedScale(
       scale: _pressed ? 0.97 : 1.0,
       duration: const Duration(milliseconds: 160),
@@ -120,17 +141,15 @@ class _PosterCardState extends ConsumerState<PosterCard> {
               borderRadius: BorderRadius.circular(radius),
               color: AppColors.paperElevated,
               border: Border.all(
-                color: widget.selected
-                    ? AppColors.anime
-                    : AppColors.borderSubtle,
-                width: widget.selected ? 2 : 1,
+                color: borderColor,
+                width: borderWidth,
               ),
               boxShadow: AppShadows.card,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(radius),
               child: _isStrip
-                  ? _buildStripBody(color, progress)
+                  ? _buildStripBody(color, progress, riskColor)
                   : _isPoster
                       ? _buildPosterBody(color, progress, shownTitle)
                       : _buildMagazineBody(color, progress, shownTitle),
@@ -308,10 +327,11 @@ class _PosterCardState extends ConsumerState<PosterCard> {
   }
 
   /// Full-bleed poster; progress + + sit on the art (readable on short cards).
-  Widget _buildStripBody(Color color, double progress) {
+  Widget _buildStripBody(Color color, double progress, Color? riskColor) {
     final progressLabel =
         '${item.currentUnits}/${item.totalUnits ?? '?'} ${item.unitLabel}';
     final showPlus = widget.showIncrement && widget.onIncrement != null;
+    final pinLeft = widget.onMenu != null ? 32.0 : 4.0;
 
     return Stack(
       fit: StackFit.expand,
@@ -336,6 +356,14 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             ),
           ),
         ),
+        if (riskColor != null)
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 3,
+            child: ColoredBox(color: riskColor),
+          ),
         if (widget.onMenu != null)
           Positioned(
             top: 4,
@@ -348,7 +376,7 @@ class _PosterCardState extends ConsumerState<PosterCard> {
         if (item.isPinned)
           Positioned(
             top: 4,
-            left: widget.onMenu != null ? 32 : 4,
+            left: pinLeft,
             child: _PaperPill(
               background: (item.pinTier == PinTier.priority
                       ? AppColors.lightNovel
@@ -365,6 +393,22 @@ class _PosterCardState extends ConsumerState<PosterCard> {
             top: 4,
             right: 4,
             child: DeadlineBadge(deadline: item.deadline!),
+          ),
+        if (widget.showStale)
+          Positioned(
+            top: item.deadline != null ? 28 : 4,
+            right: 4,
+            child: _PaperPill(
+              background: AppColors.warning.withValues(alpha: 0.92),
+              child: Text(
+                '久未動',
+                style: AppTypography.micro.copyWith(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
           ),
         Positioned(
           left: 6,

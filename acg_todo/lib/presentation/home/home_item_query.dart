@@ -64,6 +64,7 @@ bool itemMatchesQuery(Item item, String query) {
 List<Item> filterAndSortHomeItems({
   required List<Item> items,
   required HomeSortMode sortMode,
+  bool sortAscending = false,
   String? typeKey,
   String? folderFilter,
   String? tagFilter,
@@ -110,5 +111,5 @@ List<Item> filterAndSortHomeItems({
     list = list.where((i) => itemMatchesQuery(i, q)).toList();
   }
 
-  return sorter.sort(list, sortMode);
+  return sorter.sort(list, sortMode, ascending: sortAscending);
 }

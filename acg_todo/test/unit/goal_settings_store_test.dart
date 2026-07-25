@@ -36,6 +36,26 @@ void main() {
     expect(store.todayUnits(DateTime(2026, 7, 11)), 1);
   });
 
+  test('clearTodayProgress zeros today bucket', () async {
+    final day = DateTime(2026, 7, 17, 12);
+    await store.addTodayProgress(4, day);
+    expect(store.todayUnits(day), 4);
+    await store.clearTodayProgress(day);
+    expect(store.todayUnits(day), 0);
+  });
+
+  test('clearMonthProgress only clears this month', () async {
+    await store.addTodayProgress(3, DateTime(2026, 7, 10));
+    await store.addTodayProgress(2, DateTime(2026, 6, 20));
+    await store.clearMonthProgress(DateTime(2026, 7, 17));
+    expect(store.unitsForDayKey(store.dayKey(DateTime(2026, 7, 10))), 0);
+    expect(store.unitsForDayKey(store.dayKey(DateTime(2026, 6, 20))), 2);
+  });
+
+  test('homeSortAscending default false', () {
+    expect(store.homeSortAscending, isFalse);
+  });
+
   test('setGoalUnits clamps 1-999', () async {
     await store.setGoalUnits(0);
     expect(store.goalUnits, 1);

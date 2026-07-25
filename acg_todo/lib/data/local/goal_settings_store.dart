@@ -15,6 +15,7 @@ class GoalSettingsStore {
   static const _deadlineOverdueKey = 'deadline_remind_overdue';
   static const _homeDensityKey = 'home_grid_density';
   static const _homeSortKey = 'home_sort_mode';
+  static const _homeSortAscKey = 'home_sort_ascending';
   static const _searchT2sKey = 'search_trad_to_simp';
   static const _titleS2tKey = 'title_simp_to_trad';
   static const _homeHeroModeKey = 'home_hero_mode';
@@ -81,6 +82,7 @@ class GoalSettingsStore {
       final u = Map<String, dynamic>.from(ui);
       _putLocal(_homeDensityKey, u['home_grid_density']);
       _putLocal(_homeSortKey, u['home_sort_mode']);
+      _putLocal(_homeSortAscKey, u['home_sort_ascending']);
       _putLocal(_searchT2sKey, u['search_trad_to_simp']);
       _putLocal(_titleS2tKey, u['title_simp_to_trad']);
       _putLocal(_homeHeroModeKey, u['home_hero_mode']);
@@ -209,6 +211,15 @@ class GoalSettingsStore {
     await _kv.put(_homeSortKey, mode.name);
   }
 
+  /// When true, reverse non-manual sort (A→Z, old→new, low→high).
+  /// Default false matches historical "newest / highest first" behavior.
+  bool get homeSortAscending =>
+      _kv.get(_homeSortAscKey, defaultValue: false) as bool;
+
+  Future<void> setHomeSortAscending(bool ascending) async {
+    await _kv.put(_homeSortAscKey, ascending);
+  }
+
   bool get searchTradToSimp =>
       _kv.get(_searchT2sKey, defaultValue: true) as bool;
 
@@ -298,6 +309,76 @@ class GoalSettingsStore {
     await _kv.flush();
   }
 
+  Future<void> clearTodayProgress([DateTime? now]) =>
+      setTodayProgress(0, now);
+
+  Future<void> _zeroDayKeys(Iterable<String> keys) async {
+    for (final key in keys) {
+      _kv.putSync('$_dayBucketPrefix$key', 0);
+    }
+    final today = dayKey();
+    if (keys.contains(today)) {
+      _kv.putSync(_progressDateKey, today);
+      _kv.putSync(_progressUnitsKey, 0);
+    }
+    await _kv.flush();
+  }
+
+  /// Zero the last [days] calendar day buckets (rolling window).
+  Future<void> clearRollingProgress(int days, [DateTime? now]) async {
+    final n = now ?? DateTime.now();
+    final keys = <String>[];
+    for (var i = 0; i < days; i++) {
+      keys.add(dayKey(n.subtract(Duration(days: i))));
+    }
+    await _zeroDayKeys(keys);
+  }
+
+  /// Zero day buckets from the 1st of this month through today.
+  Future<void> clearMonthProgress([DateTime? now]) async {
+    final n = now ?? DateTime.now();
+    final keys = <String>[];
+    for (var day = 1; day <= n.day; day++) {
+      keys.add(dayKey(DateTime(n.year, n.month, day)));
+    }
+    await _zeroDayKeys(keys);
+  }
+
+  /// Zero all day buckets for the current calendar year.
+  Future<void> clearYearProgress([DateTime? now]) async {
+    final n = now ?? DateTime.now();
+    final yearPrefix = n.year.toString().padLeft(4, '0');
+    final keys = <String>[];
+    for (final key in _kv.keys) {
+      if (key is! String || !key.startsWith(_dayBucketPrefix)) continue;
+      final day = key.substring(_dayBucketPrefix.length);
+      if (day.startsWith(yearPrefix)) keys.add(day);
+    }
+    final legacyDate = _kv.get(_progressDateKey) as String?;
+    if (legacyDate != null &&
+        legacyDate.startsWith(yearPrefix) &&
+        !keys.contains(legacyDate)) {
+      keys.add(legacyDate);
+    }
+    await _zeroDayKeys(keys);
+  }
+
+  /// Clear every progress day bucket (all-time goal cumulative).
+  Future<void> clearAllProgressDays() async {
+    final keys = <String>[];
+    for (final key in _kv.keys) {
+      if (key is! String || !key.startsWith(_dayBucketPrefix)) continue;
+      keys.add(key.substring(_dayBucketPrefix.length));
+    }
+    final legacyDate = _kv.get(_progressDateKey) as String?;
+    if (legacyDate != null && !keys.contains(legacyDate)) {
+      keys.add(legacyDate);
+    }
+    await _zeroDayKeys(keys);
+    _kv.putSync(_progressUnitsKey, 0);
+    await _kv.flush();
+  }
+
   int rollingUnits(int days, [DateTime? now]) {
     final n = now ?? DateTime.now();
     var sum = 0;
@@ -368,6 +449,7 @@ class GoalSettingsStore {
       'ui': {
         'home_grid_density': homeGridDensity,
         'home_sort_mode': homeSortMode.name,
+        'home_sort_ascending': homeSortAscending,
         'search_trad_to_simp': searchTradToSimp,
         'title_simp_to_trad': titleSimpToTrad,
         'home_hero_mode': homeHeroMode,
@@ -441,6 +523,9 @@ class GoalSettingsStore {
       final sort = u['home_sort_mode'];
       if (sort is String) {
         await setHomeSortMode(HomeSortMode.fromStorage(sort));
+      }
+      if (u['home_sort_ascending'] is bool) {
+        await setHomeSortAscending(u['home_sort_ascending'] as bool);
       }
       if (u['search_trad_to_simp'] is bool) {
         await setSearchTradToSimp(u['search_trad_to_simp'] as bool);

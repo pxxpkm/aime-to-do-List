@@ -9,6 +9,7 @@ import 'package:acg_todo/core/theme/app_colors.dart';
 import 'package:acg_todo/core/theme/app_typography.dart';
 import 'package:acg_todo/core/utils/item_display.dart';
 import 'package:acg_todo/domain/entities/item.dart';
+import 'package:acg_todo/presentation/home/home_hero_pool.dart';
 import 'package:acg_todo/presentation/providers/daily_goal_provider.dart';
 import 'package:acg_todo/presentation/providers/repository_providers.dart';
 import 'package:acg_todo/presentation/widgets/poster_image_widget.dart';
@@ -155,22 +156,23 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
         ? displayTitle(shown.title, simpToTrad: s2t)
         : '';
 
-    // Large portrait stage ~2:3, fills most of the dialog.
+    // Immersive 2:3 stage — height-first, desktop max ~640 wide.
     final screen = MediaQuery.sizeOf(context);
-    var cardW = (screen.width * 0.82).clamp(200.0, 340.0);
-    var cardH = cardW * 1.5;
-    final maxH = screen.height - 200;
-    if (cardH > maxH) {
-      cardH = maxH;
-      cardW = cardH / 1.5;
-    }
+    final chrome = _rolling ? 110.0 : 152.0;
+    final size = gachaPosterSize(
+      screenWidth: screen.width,
+      screenHeight: screen.height,
+      chromeHeight: chrome + MediaQuery.paddingOf(context).vertical,
+    );
+    final cardW = size.width;
+    final cardH = size.height;
 
     return Material(
       color: Colors.transparent,
       child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -178,15 +180,15 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                   _rolling ? '抽海報中…' : '抽到了！',
                   style: AppTypography.title.copyWith(
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 20,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   '純娛樂 · 不影響釘選',
                   style: AppTypography.micro.copyWith(color: Colors.white70),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 Stack(
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
@@ -295,7 +297,7 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
                 if (_rolling)
                   const SizedBox(
                     width: 28,
@@ -309,7 +311,7 @@ class _PosterGachaDialogState extends ConsumerState<PosterGachaDialog> {
                   Wrap(
                     alignment: WrapAlignment.center,
                     spacing: 8,
-                    runSpacing: 8,
+                    runSpacing: 6,
                     children: [
                       FilledButton.icon(
                         onPressed: _startRoll,

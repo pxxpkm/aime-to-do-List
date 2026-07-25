@@ -32,8 +32,14 @@ enum HomeSortMode {
 class ItemSortService {
   const ItemSortService();
 
-  List<Item> sort(List<Item> input, HomeSortMode mode) {
+  /// [ascending] reverses non-manual mode comparison (pin tiers stay fixed).
+  List<Item> sort(
+    List<Item> input,
+    HomeSortMode mode, {
+    bool ascending = false,
+  }) {
     final list = List<Item>.from(input);
+    final flip = ascending && mode != HomeSortMode.manual;
     int modeCompare(Item a, Item b) => switch (mode) {
           HomeSortMode.manual => _manual(a, b),
           HomeSortMode.deadline => _deadline(a, b),
@@ -53,7 +59,8 @@ class ItemSortService {
         if (p != 0) return p;
         return a.id.compareTo(b.id);
       }
-      return modeCompare(a, b);
+      final c = modeCompare(a, b);
+      return flip ? -c : c;
     });
     return list;
   }
